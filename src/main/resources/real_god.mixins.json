@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "package": "com.nobtg.realgod.mixins",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "real_god.refmap.json",
+  "priority": 2147483647,
+  "mixinPriority": 2147483647,
+  "mixins": [
+  ],
+  "client": [
+    "LevelRendererMixin",
+    "RenderSystemMixin"
+  ],
+  "server": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
