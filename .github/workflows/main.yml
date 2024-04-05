@@ -35,11 +35,12 @@ jobs:
         compression-level: 0
         overwrite: true
 
-    - name: Github Release
+    - name: Create a Release
       uses: elgohr/Github-Release-Action@v5
+      env:
+        GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
       with:
-        title: Last Release
-        workdir: build/libs
+        title: Last Version
 
   dependency-submission:
     runs-on: ubuntu-latest
