@@ -1,6 +1,5 @@
 package com.nobtg.realgod.core;
 
-import com.nobtg.realgod.Launch;
 import com.nobtg.realgod.utils.clazz.Method;
 import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.ITransformationService;
@@ -29,9 +28,5 @@ public final class RealGodTransformationService implements ITransformationServic
     @Override
     public @NotNull List<ITransformer> transformers() {
         return List.of();
-    }
-
-    static {
-        Launch.inject();
     }
 }

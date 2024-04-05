@@ -1,16 +1,47 @@
 package com.nobtg.realgod.utils.clazz;
 
 import com.nobtg.realgod.libs.me.xdark.shell.JVMUtil;
-import sun.misc.Unsafe;
+import com.nobtg.realgod.utils.Pair;
+import com.nobtg.realgod.utils.file.FileHelper;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.lang.invoke.MethodHandles;
+import java.io.FileReader;
+import java.io.IOException;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class ClassHelper {
+    //                             class   mcp      srg
+    private static final List<Pair<String, String, String>> reNameMap = new ArrayList<>();
+    private static final boolean isRunInIDE;
+
+    static {
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(FileHelper.downloadFile("out.txt")));
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                String[] a = line.split(",");
+                for (String string : a) {
+                    String[] target = string.split(";");
+                    String[] strings = target[1].split(":");
+                    reNameMap.add(new Pair<>(target[0], strings[1], strings[0]));
+                }
+            }
+
+            reader.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        isRunInIDE = !new File(ClassHelper.getJarPath(ClassHelper.class)).isFile();
+    }
+
     public static Class<?> getCallerClass() {
         try {
             return Class.forName(new Exception().getStackTrace()[2].getClassName());
@@ -27,10 +58,8 @@ public final class ClassHelper {
     public static String getJarPath(Class<?> clazz) {
         String file = clazz.getProtectionDomain().getCodeSource().getLocation().getPath();
         if (!file.isEmpty()) {
-            if (file.startsWith("union:"))
-                file = file.substring(6);
-            if (file.startsWith("/"))
-                file = file.substring(1);
+            if (file.startsWith("union:")) file = file.substring(6);
+            if (file.startsWith("/")) file = file.substring(1);
             file = file.substring(0, file.lastIndexOf(".jar") + 4);
             file = file.replaceAll("/", "\\\\");
         }
@@ -54,42 +83,20 @@ public final class ClassHelper {
     public static Object getOuter(Object inner) {
         Object outer;
         try {
-            Field field = inner.getClass().getDeclaredField("this$0");
+            Field field = inner.getClass().getDeclaredField(reMapName("this$0", inner.getClass().getName()));
             field.setAccessible(true);
             outer = field.get(inner);
-        } catch (IllegalAccessException | NoSuchFieldException e) {
+        } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
         return outer;
     }
 
-    public static void set(Class<?> clazz, String name, Object instance, Object value, Class<?> fieldType) {
-        try {
-            Field target = clazz.getDeclaredField(name);
-            Unsafe unsafe = JVMUtil.unsafe;
-            unsafe.putObject(instance, unsafe.objectFieldOffset(target), value);
-        } catch (NoSuchFieldException e) {
-            MethodHandles.Lookup lookup = JVMUtil.lookup;
-            try {
-                lookup.findVarHandle(clazz, name, fieldType).set(instance, value);
-            } catch (NoSuchFieldException | IllegalAccessException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
+    public static String reMapName(String mcp, String className) {
+        return isRunInIDE() ? mcp : reNameMap.stream().filter(pair -> pair.a().equals(className) && pair.b().equals(mcp)).map(Pair::c).findFirst().orElse(mcp);
     }
 
-    public static void setStatic(Class<?> clazz, String name, Object value, Class<?> fieldType) {
-        try {
-            Field target = clazz.getDeclaredField(name);
-            Unsafe unsafe = JVMUtil.unsafe;
-            unsafe.putObject(unsafe.staticFieldBase(target), unsafe.staticFieldOffset(target), value);
-        } catch (NoSuchFieldException e) {
-            MethodHandles.Lookup lookup = JVMUtil.lookup;
-            try {
-                lookup.findStaticVarHandle(clazz, name, fieldType).set(value);
-            } catch (NoSuchFieldException | IllegalAccessException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
+    public static boolean isRunInIDE() {
+        return isRunInIDE;
     }
 }

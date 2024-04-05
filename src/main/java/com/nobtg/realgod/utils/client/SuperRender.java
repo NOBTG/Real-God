@@ -4,32 +4,43 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.MemoryTracker;
+import com.mojang.blaze3d.shaders.BlendMode;
 import com.mojang.blaze3d.shaders.Shader;
+import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.nobtg.realgod.libs.me.xdark.shell.JVMUtil;
 import com.nobtg.realgod.utils.clazz.ClassHelper;
-import net.minecraft.Util;
+import it.unimi.dsi.fastutil.ints.IntConsumer;
+import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.EffectInstance;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.*;
+import org.lwjgl.system.JNI;
+import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
 import java.lang.invoke.VarHandle;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+
+import static org.lwjgl.system.MemoryStack.stackGet;
+import static org.lwjgl.system.MemoryUtil.memAddress;
 
 public final class SuperRender {
     public static boolean isSuperMode = false;
 
     public static void renderSuper() {
-        Minecraft mc = Minecraft.getInstance();
+        Minecraft mc = Minecraft.instance;
 
-        long i = Util.getNanos();
+        long i = System.nanoTime();
 
         GL11C.glClear(16640);
 
@@ -52,18 +63,10 @@ public final class SuperRender {
 
         GL30C.glBindFramebuffer(36160, 0);
 
-        int width = mc.window.getWidth();
-        int height = mc.window.getHeight();
+        int width = mc.window.framebufferWidth;
+        int height = mc.window.framebufferHeight;
 
         _blitToScreen(target, width, height, true);
-    }
-
-    public static VertexBuffer getImmediateDrawVertexBuffer(VertexFormat format) {
-        VertexBuffer vertexbuffer = format.immediateDrawVertexBuffer;
-        if (vertexbuffer == null) {
-            format.immediateDrawVertexBuffer = vertexbuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
-        }
-        return vertexbuffer;
     }
 
     public static void _bindWrite(RenderTarget target, boolean p_83962_) {
@@ -78,7 +81,6 @@ public final class SuperRender {
         }
     }
 
-    //apply,storeRenderedBuffer
     public static void _blitToScreen(RenderTarget target, int width, int height, boolean p_83974_) {
         if (!GlStateManager.COLOR_MASK.red || !GlStateManager.COLOR_MASK.green || !GlStateManager.COLOR_MASK.blue || GlStateManager.COLOR_MASK.alpha) {
             GlStateManager.COLOR_MASK.red = true;
@@ -167,6 +169,7 @@ public final class SuperRender {
 
             shaderinstance.PROJECTION_MATRIX.dirty = true;
 
+            assert shaderinstance.MODEL_VIEW_MATRIX != null;
             Shader parent = shaderinstance.MODEL_VIEW_MATRIX.parent;
             Class<?> parentClass = parent.getClass();
 
@@ -177,7 +180,234 @@ public final class SuperRender {
             }
         }
 
-        shaderinstance.apply();
+        {
+            shaderinstance.dirty = false;
+            ShaderInstance.lastAppliedShader = shaderinstance;
+
+            boolean equals;
+            if (shaderinstance.blend == BlendMode.lastApplied) {
+                equals = true;
+            } else if (!(BlendMode.lastApplied instanceof BlendMode)) {
+                equals = false;
+            } else {
+                BlendMode blendmode = BlendMode.lastApplied;
+                if (shaderinstance.blend.blendFunc != blendmode.blendFunc) {
+                    equals = false;
+                } else if (shaderinstance.blend.dstAlphaFactor != blendmode.dstAlphaFactor) {
+                    equals = false;
+                } else if (shaderinstance.blend.dstColorFactor != blendmode.dstColorFactor) {
+                    equals = false;
+                } else if (shaderinstance.blend.opaque != blendmode.opaque) {
+                    equals = false;
+                } else if (shaderinstance.blend.separateBlend != blendmode.separateBlend) {
+                    equals = false;
+                } else if (shaderinstance.blend.srcAlphaFactor != blendmode.srcAlphaFactor) {
+                    equals = false;
+                } else {
+                    equals = shaderinstance.blend.srcColorFactor == blendmode.srcColorFactor;
+                }
+            }
+
+            if (!equals) {
+                if (BlendMode.lastApplied == null || shaderinstance.blend.opaque != BlendMode.lastApplied.opaque) {
+                    BlendMode.lastApplied = shaderinstance.blend;
+                    boolean Return = false;
+                    if (shaderinstance.blend.opaque) {
+                        GlStateManager.BooleanState state2 = GlStateManager.BLEND.mode;
+
+                        if (state2.enabled) {
+                            state2.enabled = false;
+                            GL11C.glDisable(state2.state);
+                        }
+                        Return = true;
+                    }
+
+                    if (!Return) {
+
+                        GlStateManager.BooleanState state2 = GlStateManager.BLEND.mode;
+
+                        if (!state2.enabled) {
+                            state2.enabled = true;
+                            GL11C.glDisable(state2.state);
+                        }
+                    }
+                }
+
+                GL14C.glBlendEquation(shaderinstance.blend.blendFunc);
+                if (shaderinstance.blend.separateBlend) {
+                    if (shaderinstance.blend.srcColorFactor != GlStateManager.BLEND.srcRgb || shaderinstance.blend.dstColorFactor != GlStateManager.BLEND.dstRgb || shaderinstance.blend.srcAlphaFactor != GlStateManager.BLEND.srcAlpha || shaderinstance.blend.dstAlphaFactor != GlStateManager.BLEND.dstAlpha) {
+                        GlStateManager.BLEND.srcRgb = shaderinstance.blend.srcColorFactor;
+                        GlStateManager.BLEND.dstRgb = shaderinstance.blend.dstColorFactor;
+                        GlStateManager.BLEND.srcAlpha = shaderinstance.blend.srcAlphaFactor;
+                        GlStateManager.BLEND.dstAlpha = shaderinstance.blend.dstAlphaFactor;
+                        GL14C.glBlendFuncSeparate(shaderinstance.blend.srcColorFactor, shaderinstance.blend.dstColorFactor, shaderinstance.blend.srcAlphaFactor, shaderinstance.blend.dstAlphaFactor);
+                    }
+                } else {
+                    if (shaderinstance.blend.srcColorFactor != GlStateManager.BLEND.srcRgb || shaderinstance.blend.dstColorFactor != GlStateManager.BLEND.dstRgb) {
+                        GlStateManager.BLEND.srcRgb = shaderinstance.blend.srcColorFactor;
+                        GlStateManager.BLEND.dstRgb = shaderinstance.blend.dstColorFactor;
+                        GL11C.glBlendFunc(shaderinstance.blend.srcColorFactor, shaderinstance.blend.dstColorFactor);
+                    }
+                }
+            }
+
+            if (shaderinstance.programId != ShaderInstance.lastProgramId) {
+                GL20C.glUseProgram(shaderinstance.programId);
+                ShaderInstance.lastProgramId = shaderinstance.programId;
+            }
+
+            int i = GlStateManager.activeTexture + '\u84c0';
+
+            for (int j = 0; j < shaderinstance.samplerLocations.size(); ++j) {
+                String s = shaderinstance.samplerNames.get(j);
+                if (shaderinstance.samplerMap.get(s) != null) {
+                    MemoryStack stack = stackGet();
+                    int stackPointer = stack.getPointer();
+                    int k;
+                    try {
+                        stack.nASCII(s, true);
+                        long nameEncoded = stack.getPointerAddress();
+                        k = GL20C.nglGetUniformLocation(shaderinstance.programId, nameEncoded);
+                    } finally {
+                        stack.setPointer(stackPointer);
+                    }
+
+                    GL20C.glUniform1i(k, j);
+
+                    if (GlStateManager.activeTexture != j) {
+                        GlStateManager.activeTexture = j;
+                        GL13C.glActiveTexture(j);
+                    }
+
+                    Object object = shaderinstance.samplerMap.get(s);
+                    int l = -1;
+                    if (object instanceof RenderTarget renderTarget) {
+                        l = renderTarget.colorTextureId;
+                    } else if (object instanceof AbstractTexture texture) {
+                        if (texture.id == -1) {
+                            if (SharedConstants.IS_RUNNING_IN_IDE) {
+                                int[] aint = new int[ThreadLocalRandom.current().nextInt(15) + 1];
+                                GLCapabilities capabilities;
+
+                                try {
+                                    capabilities = ((GLCapabilities) JVMUtil.lookup.findStaticVarHandle(Class.forName("org.lwjgl.opengl.GL$ICDStatic$WriteOnce"), "caps", GLCapabilities.class).get());
+                                } catch (NoSuchFieldException | IllegalAccessException | ClassNotFoundException e) {
+                                    throw new RuntimeException(e);
+                                }
+
+                                JNI.callPV(aint.length, aint, capabilities.glGenTextures);
+
+                                int g;
+                                MemoryStack stack1 = stackGet();
+                                int stackPointer1 = stack1.getPointer();
+                                try {
+                                    IntBuffer textures = stack1.callocInt(1);
+                                    GL11C.nglGenTextures(1, memAddress(textures));
+                                    g = textures.get(0);
+                                } finally {
+                                    stack1.setPointer(stackPointer1);
+                                }
+
+                                for (GlStateManager.TextureState glstatemanager$texturestate : GlStateManager.TEXTURES) {
+                                    for (int i1 : aint) {
+                                        if (glstatemanager$texturestate.binding == i1) {
+                                            glstatemanager$texturestate.binding = -1;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                JNI.callPV(aint.length, aint, capabilities.glDeleteTextures);
+                                texture.id = g;
+                            } else {
+                                MemoryStack stack1 = stackGet();
+                                int stackPointer1 = stack1.getPointer();
+                                try {
+                                    IntBuffer textures = stack1.callocInt(1);
+                                    GL11C.nglGenTextures(1, memAddress(textures));
+                                    texture.id = textures.get(0);
+                                } finally {
+                                    stack1.setPointer(stackPointer1);
+                                }
+                            }
+                        }
+
+                        l = texture.id;
+                    } else if (object instanceof Integer integer) {
+                        l = integer;
+                    }
+
+                    if (l != -1) {
+                        if (l != GlStateManager.TEXTURES[GlStateManager.activeTexture].binding) {
+                            GlStateManager.TEXTURES[GlStateManager.activeTexture].binding = l;
+                            GL11C.glBindTexture(3553, l);
+                        }
+                    }
+                }
+            }
+
+            if (GlStateManager.activeTexture != i - '\u84c0') {
+                GlStateManager.activeTexture = i - '\u84c0';
+                GL13C.glActiveTexture(i);
+            }
+
+            for (Uniform uniform : shaderinstance.uniforms) {
+                uniform.dirty = false;
+                if (uniform.type <= 3) {
+                    position.set(uniform.intValues, 0);
+                    mark.set(uniform.intValues, -1);
+                    switch (uniform.type) {
+                        case 0:
+                            GL20C.nglUniform1iv(uniform.location, uniform.intValues.remaining(), memAddress(uniform.intValues));
+                            break;
+                        case 1:
+                            GL20C.nglUniform2iv(uniform.location, uniform.intValues.remaining() >> 1, memAddress(uniform.intValues));
+                            break;
+                        case 2:
+                            GL20C.nglUniform3iv(uniform.location, uniform.intValues.remaining() / 3, memAddress(uniform.intValues));
+                            break;
+                        case 3:
+                            GL20C.nglUniform4iv(uniform.location, uniform.intValues.remaining() >> 2, memAddress(uniform.intValues));
+                            break;
+                    }
+                } else if (uniform.type <= 7) {
+                    position.set(uniform.floatValues, 0);
+                    mark.set(uniform.floatValues, -1);
+                    switch (uniform.type) {
+                        case 4:
+                            GL20C.nglUniform1fv(uniform.location, uniform.floatValues.remaining(), memAddress(uniform.floatValues));
+                            break;
+                        case 5:
+                            GL20C.nglUniform2fv(uniform.location, uniform.floatValues.remaining() >> 1, memAddress(uniform.floatValues));
+                            break;
+                        case 6:
+                            GL20C.nglUniform3fv(uniform.location, uniform.floatValues.remaining() / 3, memAddress(uniform.floatValues));
+                            break;
+                        case 7:
+                            GL20C.nglUniform4fv(uniform.location, uniform.floatValues.remaining() >> 2, memAddress(uniform.floatValues));
+                            break;
+                    }
+                } else {
+                    position.set(uniform.floatValues, 0);
+                    try {
+                        JVMUtil.lookup.findVarHandle(Buffer.class, "limit", int.class).set(uniform.floatValues, JVMUtil.lookup.findVarHandle(Buffer.class, "capacity", int.class).get(uniform.floatValues));
+                    } catch (NoSuchFieldException | IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                    mark.set(uniform.floatValues, -1);
+                    switch (uniform.type) {
+                        case 8:
+                            GL20C.nglUniformMatrix2fv(uniform.location, uniform.floatValues.remaining() >> 2, false, memAddress(uniform.floatValues));
+                            break;
+                        case 9:
+                            GL20C.nglUniformMatrix3fv(uniform.location, uniform.floatValues.remaining() / 9, false, memAddress(uniform.floatValues));
+                            break;
+                        case 10:
+                            GL20C.nglUniformMatrix4fv(uniform.location, uniform.floatValues.remaining() >> 4, false, memAddress(uniform.floatValues));
+                    }
+                }
+            }
+        }
 
         float f = (float) width;
         float f1 = (float) height;
@@ -196,7 +426,7 @@ public final class SuperRender {
 
         VertexBuffer vertexBuffer;
 
-        BufferBuilder.RenderedBuffer renderedBuffer = null;
+        BufferBuilder.RenderedBuffer renderedBuffer;
         {
             int i = switch (bufferbuilder.mode) {
                 case LINE_STRIP, DEBUG_LINES, DEBUG_LINE_STRIP, TRIANGLES, TRIANGLE_STRIP, TRIANGLE_FAN ->
@@ -212,12 +442,27 @@ public final class SuperRender {
                 int l = Mth.roundToward(i * vertexformat$indextype.bytes, 4);
 
                 if (bufferbuilder.nextElementByte + l > bufferbuilder.buffer.capacity()) {
-                    ByteBuffer bytebuffer = MemoryTracker.resize(bufferbuilder.buffer, bufferbuilder.buffer.capacity() + roundUp(l));
-                    bytebuffer.rewind();
+                    ByteBuffer bytebuffer = MemoryTracker.resize(bufferbuilder.buffer, bufferbuilder.buffer.capacity() + (l == 0 ? 2097152 : (l < 0 ? l - l % -2097152 : l + 2097152 - l % 2097152)));
+                    position.set(bytebuffer, 0);
+                    mark.set(bytebuffer, -1);
                     bufferbuilder.buffer = bytebuffer;
                 }
 
-                bufferbuilder.putSortedQuadIndices(vertexformat$indextype);
+                if (bufferbuilder.sortingPoints != null && bufferbuilder.sorting != null) {
+                    int[] aint = bufferbuilder.sorting.sort(bufferbuilder.sortingPoints);
+                    IntConsumer intconsumer = bufferbuilder.intConsumer(bufferbuilder.nextElementByte, vertexformat$indextype);
+
+                    for(int i2 : aint) {
+                        intconsumer.accept(i2 * bufferbuilder.mode.primitiveStride);
+                        intconsumer.accept(i2 * bufferbuilder.mode.primitiveStride + 1);
+                        intconsumer.accept(i2 * bufferbuilder.mode.primitiveStride + 2);
+                        intconsumer.accept(i2 * bufferbuilder.mode.primitiveStride + 2);
+                        intconsumer.accept(i2 * bufferbuilder.mode.primitiveStride + 3);
+                        intconsumer.accept(i2 * bufferbuilder.mode.primitiveStride);
+                    }
+
+                }
+
                 flag = false;
                 bufferbuilder.nextElementByte += l;
                 k = j + l;
@@ -254,7 +499,10 @@ public final class SuperRender {
 
             vertexBuffer = null;
         } else {
-            VertexBuffer vertexBuffer1 = getImmediateDrawVertexBuffer(renderedBuffer.drawState.format);
+            if (renderedBuffer.drawState.format.immediateDrawVertexBuffer == null) {
+                renderedBuffer.drawState.format.immediateDrawVertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
+            }
+            VertexBuffer vertexBuffer1 = renderedBuffer.drawState.format.immediateDrawVertexBuffer;
 
             if (vertexBuffer1 != BufferUploader.lastImmediateBuffer) {
                 BufferUploader.lastImmediateBuffer = null;
@@ -267,7 +515,8 @@ public final class SuperRender {
                 try {
                     BufferBuilder.DrawState bufferbuilder$drawstate = renderedBuffer.drawState;
                     boolean flag = false;
-                    if (!vertexFormatEquals(bufferbuilder$drawstate.format, vertexBuffer1.format)) {
+
+                    if (!(bufferbuilder$drawstate.format == vertexBuffer1.format || (vertexBuffer1.format != null && bufferbuilder$drawstate.format.getClass() == vertexBuffer1.format.getClass() && (bufferbuilder$drawstate.format.vertexSize == vertexBuffer1.format.vertexSize && bufferbuilder$drawstate.format.elementMapping.equals(vertexBuffer1.format.elementMapping))))) {
                         if (vertexBuffer1.format != null) {
                             ImmutableList<VertexFormatElement> immutablelist = vertexBuffer1.format.elements;
                             for (int i = 0; i < vertexBuffer1.format.elements.size(); ++i) {
@@ -298,7 +547,7 @@ public final class SuperRender {
                         int j = renderedBuffer.pointer + (renderedBuffer.drawState.vertexCount * renderedBuffer.drawState.format.vertexSize);
                         buffer = MemoryUtil.memSlice(builder.buffer, i, j - i);
 
-                        GL15C.glBufferData(34962, buffer, vertexBuffer1.usage.id);
+                        GL15C.nglBufferData(34962, buffer.remaining(), memAddress(buffer), vertexBuffer1.usage.id);
                     }
 
                     vertexBuffer1.format = bufferbuilder$drawstate.format;
@@ -312,7 +561,7 @@ public final class SuperRender {
                         int j = renderedBuffer.pointer + renderedBuffer.drawState.indexBufferEnd();
                         buffer = MemoryUtil.memSlice(builder.buffer, i, j - i);
 
-                        GL15C.glBufferData(34963, buffer, vertexBuffer1.usage.id);
+                        GL15C.nglBufferData(34963, buffer.remaining(), memAddress(buffer), vertexBuffer1.usage.id);
                         vertexBuffer1.sequentialIndices = null;
                     } else {
                         RenderSystem.AutoStorageIndexBuffer autoBuffer = switch (bufferbuilder$drawstate.mode) {
@@ -323,7 +572,15 @@ public final class SuperRender {
 
                         if (autoBuffer != vertexBuffer1.sequentialIndices || !(bufferbuilder$drawstate.indexCount <= autoBuffer.indexCount)) {
                             if (autoBuffer.name == 0) {
-                                autoBuffer.name = GL15C.glGenBuffers();
+                                MemoryStack stack = stackGet();
+                                int stackPointer = stack.getPointer();
+                                try {
+                                    IntBuffer buffers = stack.callocInt(1);
+                                    GL15C.nglGenBuffers(1, memAddress(buffers));
+                                    autoBuffer.name = buffers.get(0);
+                                } finally {
+                                    stack.setPointer(stackPointer);
+                                }
                             }
 
                             GL15C.glBindBuffer(34963, autoBuffer.name);
@@ -335,7 +592,9 @@ public final class SuperRender {
                                 VertexFormat.IndexType vertexformat$indextype = (p_157477_ & -65536) != 0 ? VertexFormat.IndexType.INT : VertexFormat.IndexType.SHORT;
                                 int i = Mth.roundToward(p_157477_ * vertexformat$indextype.bytes, 4);
                                 GL15C.nglBufferData(34963, i, MemoryUtil.NULL, 35048);
-                                ByteBuffer bytebuffer = GL15C.glMapBuffer(34963, 35001);
+
+                                ByteBuffer bytebuffer = MemoryUtil.memByteBufferSafe(GL15C.nglMapBuffer(34963, 35001), GL15C.glGetBufferParameteri(34963, GL15C.GL_BUFFER_SIZE));
+
                                 if (bytebuffer != null) {
                                     autoBuffer.type = vertexformat$indextype;
 
@@ -414,31 +673,6 @@ public final class SuperRender {
             GlStateManager.COLOR_MASK.blue = true;
             GlStateManager.COLOR_MASK.alpha = true;
             GL11C.glColorMask(true, true, true, true);
-        }
-    }
-
-    public static boolean vertexFormatEquals(VertexFormat format, Object p_86026_) {
-        if (format == p_86026_) {
-            return true;
-        } else if (p_86026_ != null && format.getClass() == p_86026_.getClass()) {
-            VertexFormat vertexformat = (VertexFormat) p_86026_;
-            return format.vertexSize == vertexformat.vertexSize && format.elementMapping.equals(vertexformat.elementMapping);
-        } else {
-            return false;
-        }
-    }
-
-    private static int roundUp(int p_85726_) {
-        int i = 2097152;
-        if (p_85726_ == 0) {
-            return i;
-        } else {
-            if (p_85726_ < 0) {
-                i *= -1;
-            }
-
-            int j = p_85726_ % i;
-            return j == 0 ? p_85726_ : p_85726_ + i - j;
         }
     }
 }

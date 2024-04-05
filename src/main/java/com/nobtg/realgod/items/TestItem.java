@@ -39,7 +39,7 @@ public final class TestItem extends Item {
                     throw new RuntimeException(e);
                 }
 
-                NativeHelper.render(FileHelper.getPath("death.bmp"));
+                NativeHelper.render(FileHelper.getPath("myth.bmp"));
             }
         }
         return super.use(p_41432_, p_41433_, p_41434_);

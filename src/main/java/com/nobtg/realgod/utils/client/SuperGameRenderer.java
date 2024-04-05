@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexSorting;
 import com.mojang.math.Axis;
 import com.nobtg.realgod.libs.me.xdark.shell.JVMUtil;
+import com.nobtg.realgod.utils.clazz.ClassHelper;
 import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -251,7 +252,7 @@ public final class SuperGameRenderer extends GameRenderer {
             RenderSystem.modelViewMatrix = new Matrix4f(RenderSystem.modelViewStack.last().pose());
         } catch (NullPointerException e) {
             String msg = e.getMessage();
-            if (!msg.contains("this.minecraft.gameMode") && !(msg.contains("f_91072_") && msg.contains("f_109059_"))) {
+            if (msg != null && msg.contains(ClassHelper.reMapName("gameMode", Minecraft.instance.getClass().getName()))) {
                 throw e;
             }
         }

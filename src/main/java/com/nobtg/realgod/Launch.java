@@ -9,7 +9,10 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.instrument.Instrumentation;
 
 @Mod(Launch.modID)
@@ -39,7 +42,21 @@ public final class Launch {
 
     public static void inject() {
         try {
-            new ProcessBuilder("java", "-jar", ClassHelper.getJarPath(Launch.class), String.valueOf(ProcessHandle.current().pid())).start().waitFor();
+            ProcessBuilder builder = new ProcessBuilder("java", "-jar", ClassHelper.getJarPath(Launch.class), String.valueOf(ProcessHandle.current().pid()));
+            builder.redirectErrorStream(true);
+            Process process = builder.start();
+
+            InputStream inputStream = process.getInputStream();
+            try (InputStreamReader streamReader = new InputStreamReader(inputStream);
+                 BufferedReader reader = new BufferedReader(streamReader)) {
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
+                }
+            }
+
+            process.waitFor();
         } catch (InterruptedException | IOException e) {
             throw new RuntimeException(e);
         }
