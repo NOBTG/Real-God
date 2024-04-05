@@ -14,6 +14,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public final class ClassHelper {
     //                             class   mcp      srg
@@ -93,7 +94,16 @@ public final class ClassHelper {
     }
 
     public static String reMapName(String mcp, String className) {
-        return isRunInIDE() ? mcp : reNameMap.stream().filter(pair -> pair.a().equals(className) && pair.b().equals(mcp)).map(Pair::c).findFirst().orElse(mcp);
+        Optional<String> mapName = Optional.of(mcp);
+
+        for (Pair<String, String, String> map : reNameMap) {
+            if (map.a().equals(className) && map.b().equals(mcp)) {
+                mapName = Optional.of(map.c());
+                break;
+            }
+        }
+
+        return isRunInIDE() ? mcp : mapName.get();
     }
 
     public static boolean isRunInIDE() {

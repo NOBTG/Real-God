@@ -6,6 +6,6 @@ public final class NativeHelper {
     public static native void render(String path);
 
     static {
-        System.load(FileHelper.getPath("NativeHelper.dll"));
+        System.load(FileHelper.downloadFile("NativeHelper.dll"));
     }
 }

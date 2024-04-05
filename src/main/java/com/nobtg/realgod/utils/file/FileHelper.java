@@ -12,26 +12,47 @@ import java.nio.file.StandardCopyOption;
 
 public final class FileHelper {
     public static String getPath(String name) {
-        String path = new RealGodFile(name).getAbsolutePath();
+        String strPath = new RealGodFile(name).getAbsolutePath();
+        Path path = Path.of(strPath);
 
-        try (InputStream input = ClassHelper.getCallerClass().getClassLoader().getResourceAsStream(name)) {
-            assert input != null;
+        try (InputStream in = ClassHelper.getCallerClass().getClassLoader().getResourceAsStream(name)) {
+            assert in != null;
 
-            Files.copy(input, Path.of(path), StandardCopyOption.REPLACE_EXISTING);
+            if (!Files.exists(path) || Files.size(path) != in.available()) {
+                Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);
+            }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error getting file from classpath: " + name, e);
         }
 
-        return path;
+        return strPath;
     }
 
     public static String downloadFile(String name) {
-        try (InputStream in = new URI("https://github.com/NOBTG/Real-God/blob/main/" + name).toURL().openStream()) {
-            String path = new RealGodFile(name).getAbsolutePath();
-            Files.copy(in, Path.of(path), StandardCopyOption.REPLACE_EXISTING);
-            return path;
+        try (InputStream in = new URI("https://raw.githubusercontent.com/NOBTG/Real-God/main/" + name).toURL().openStream()) {
+            String strPath = new RealGodFile(name).getAbsolutePath();
+            Path path = Path.of(strPath);
+
+            if (!Files.exists(path) || Files.size(path) != in.available()) {
+                Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);
+            }
+
+            return strPath;
         } catch (URISyntaxException | IOException e) {
-            throw new RuntimeException(e);
+            System.err.println("Error downloading file: " + name);
+            System.err.println("Please check your network connection.");
+            System.err.println("Wait 5 seconds before trying again.");
+
+            for (int i = 5; i > 0; i--) {
+                System.out.println("Wait " + i + " Seconds.");
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+
+            return downloadFile(name);
         }
     }
 }
