@@ -35,13 +35,6 @@ jobs:
         compression-level: 0
         overwrite: true
 
-    - name: Create a Release
-      uses: elgohr/Github-Release-Action@v5
-      env:
-        GITHUB_TOKEN: ${{ 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 }}
-      with:
-        title: Last Version
-
   dependency-submission:
     runs-on: ubuntu-latest
     permissions:
