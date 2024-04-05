@@ -27,7 +27,7 @@ jobs:
     - name: Build with Gradle Wrapper
       run: ./gradlew build
 
-    - name: Upload Build Artifact
+    - name: Build Artifact
       uses: actions/upload-artifact@v4.3.1
       with:
         name: real_god
