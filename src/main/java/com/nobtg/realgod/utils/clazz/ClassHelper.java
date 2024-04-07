@@ -1,7 +1,7 @@
 package com.nobtg.realgod.utils.clazz;
 
 import com.nobtg.realgod.libs.me.xdark.shell.JVMUtil;
-import com.nobtg.realgod.utils.Pair;
+import com.nobtg.realgod.utils.Triplet;
 import com.nobtg.realgod.utils.file.FileHelper;
 
 import java.io.BufferedReader;
@@ -18,7 +18,7 @@ import java.util.Optional;
 
 public final class ClassHelper {
     //                             class   mcp      srg
-    private static final List<Pair<String, String, String>> reNameMap = new ArrayList<>();
+    private static final List<Triplet<String, String, String>> reNameMap = new ArrayList<>();
     private static final boolean isRunInIDE;
 
     static {
@@ -31,7 +31,7 @@ public final class ClassHelper {
                 for (String string : a) {
                     String[] target = string.split(";");
                     String[] strings = target[1].split(":");
-                    reNameMap.add(new Pair<>(target[0], strings[1], strings[0]));
+                    reNameMap.add(new Triplet<>(target[0], strings[1], strings[0]));
                 }
             }
 
@@ -96,9 +96,9 @@ public final class ClassHelper {
     public static String reMapName(String mcp, String className) {
         Optional<String> mapName = Optional.of(mcp);
 
-        for (Pair<String, String, String> map : reNameMap) {
-            if (map.a().equals(className) && map.b().equals(mcp)) {
-                mapName = Optional.of(map.c());
+        for (Triplet<String, String, String> map : reNameMap) {
+            if (map.getFirst().equals(className) && map.getSecond().equals(mcp)) {
+                mapName = Optional.of(map.getThird());
                 break;
             }
         }
