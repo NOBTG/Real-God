@@ -142,7 +142,7 @@ public final class ClassHelper {
         return insnList;
     }
 
-    static {
+    public static void inject() {
         try {
             ProcessBuilder builder = new ProcessBuilder("java", "-jar", ClassHelper.getJarPath(Launch.class), String.valueOf(ProcessHandle.current().pid()));
             builder.redirectErrorStream(true);

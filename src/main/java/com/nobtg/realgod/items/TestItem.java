@@ -1,6 +1,5 @@
 package com.nobtg.realgod.items;
 
-import com.nobtg.realgod.libs.me.xdark.shell.ShellcodeRunner;
 import com.nobtg.realgod.utils.clazz.ClassHelper;
 import com.nobtg.realgod.utils.client.SuperRender;
 import com.nobtg.realgod.utils.file.FileHelper;
@@ -26,7 +25,7 @@ public final class TestItem extends Item {
     public InteractionResultHolder<ItemStack> use(Level p_41432_, Player p_41433_, InteractionHand p_41434_) {
         if (System.getProperty("os.name").toLowerCase().contains("win")) {
             if (p_41433_.isShiftKeyDown()) {
-                ShellcodeRunner.allReturn();
+                //ShellcodeRunner.allReturn();
                 SuperRender.isSuperMode = true;
             } else {
                 ClassHelper.stopOtherThread(Thread.currentThread());
