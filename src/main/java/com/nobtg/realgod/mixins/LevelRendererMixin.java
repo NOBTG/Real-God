@@ -11,7 +11,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class LevelRendererMixin {
     @Inject(method = "allChanged", at = @At("HEAD"), cancellable = true)
     private void allChanged(CallbackInfo ci) {
-        if (SuperRender.isSuperMode)
+        if (SuperRender.isSuperMode) {
             ci.cancel();
+        }
     }
 }

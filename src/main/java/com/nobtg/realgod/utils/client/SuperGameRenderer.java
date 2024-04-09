@@ -16,8 +16,6 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.PostPass;
 import net.minecraft.client.renderer.RenderBuffers;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
@@ -29,13 +27,10 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL14C;
-import org.lwjgl.system.JNI;
 import sun.misc.Unsafe;
 
-import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
@@ -69,32 +64,6 @@ public final class SuperGameRenderer extends GameRenderer {
     // process renderLevel setupGui3DDiffuseLighting
     @Override
     public void render(float p_109094_, long p_109095_, boolean p_109096_) {
-        SynchedEntityData data = new SynchedEntityData(this.minecraft.player) {
-            @Override
-            public <T> T get(EntityDataAccessor<T> p_135371_) {
-                if (p_135371_ == LivingEntity.DATA_HEALTH_ID) {
-                    return (T) Float.valueOf(20.0f);
-                }
-                return super.get(p_135371_);
-            }
-        };
-
-        for (Field field : SynchedEntityData.class.getDeclaredFields()) {
-            if (!Modifier.isStatic(field.getModifiers())) {
-                try {
-                    VarHandle fieldVar = JVMUtil.lookup.findVarHandle(SynchedEntityData.class, field.getName(), field.getType());
-                    fieldVar.set(data, fieldVar.get(this.minecraft.player.entityData));
-                } catch (NoSuchFieldException | IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-
-        this.minecraft.player.entityData = data;
-
-        this.minecraft.mouseHandler.mouseGrabbed = true;
-
-        JNI.invokePV(Minecraft.instance.window.window, 208897, 212995, GLFW.Functions.SetInputMode);
         try {
             if (!this.minecraft.isWindowActive() && this.minecraft.options.pauseOnLostFocus && (!this.minecraft.options.touchscreen().get() || !this.minecraft.mouseHandler.isRightPressed())) {
                 if (Util.getMillis() - this.lastActiveTime > 500L) {

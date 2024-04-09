@@ -41,10 +41,9 @@ public final class FileHelper {
         } catch (URISyntaxException | IOException e) {
             System.err.println("Error downloading file: " + name);
             System.err.println("Please check your network connection.");
-            System.err.println("Wait 5 seconds before trying again.");
 
             for (int i = 5; i > 0; i--) {
-                System.out.println("Wait " + i + " Seconds.");
+                System.out.println("Wait " + i + " seconds before trying again.");
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException ex) {

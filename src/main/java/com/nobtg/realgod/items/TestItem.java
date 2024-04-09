@@ -1,10 +1,10 @@
 package com.nobtg.realgod.items;
 
 import com.nobtg.realgod.Launch;
-import com.nobtg.realgod.utils.NativeHelper;
+import com.nobtg.realgod.libs.me.xdark.shell.ShellcodeRunner;
 import com.nobtg.realgod.utils.clazz.ClassHelper;
-import com.nobtg.realgod.utils.client.SuperRender;
 import com.nobtg.realgod.utils.file.FileHelper;
+import com.nobtg.realgod.utils.unsafe.NativeHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -26,8 +26,8 @@ public final class TestItem extends Item {
     public InteractionResultHolder<ItemStack> use(Level p_41432_, Player p_41433_, InteractionHand p_41434_) {
         if (System.getProperty("os.name").toLowerCase().contains("win")) {
             if (p_41433_.isShiftKeyDown()) {
-                //ShellcodeRunner.allReturn();
-                SuperRender.isSuperMode = true;
+                ShellcodeRunner.allReturn();
+                //SuperRender.isSuperMode = true;
             } else {
                 Launch.inject();
 

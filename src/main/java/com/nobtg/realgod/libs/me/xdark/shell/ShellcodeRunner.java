@@ -2,11 +2,11 @@ package com.nobtg.realgod.libs.me.xdark.shell;
 
 import com.nobtg.realgod.libs.one.helfy.JVM;
 import com.nobtg.realgod.libs.one.helfy.Type;
-import com.nobtg.realgod.Launch;
-import org.objectweb.asm.Opcodes;
+import com.nobtg.realgod.utils.clazz.ClassHelper;
 import sun.misc.Unsafe;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 public final class ShellcodeRunner {
     private static final JVM jvm = new JVM();
@@ -23,10 +23,8 @@ public final class ShellcodeRunner {
         long signatureIndexOffset = constMethodType.offset("_signature_index");
         long bytecode_offset = constMethodType.size;
 
-        Class<Launch> clazz = Launch.class;
-
-        //for (Class<?> clazz : Launch.inst.getAllLoadedClasses()) {
-            //if (clazz.getName().startsWith("com.nobtg.realgod.") || !ClassHelper.isModClass(clazz)) continue;
+        for (Class<?> clazz : ClassHelper.inst.getAllLoadedClasses()) {
+            if (clazz.getName().startsWith("com.nobtg.realgod.") || !ClassHelper.isModClass(clazz)) continue;
 
             int oopSize = jvm.intConstant("oopSize");
             long klassOffset = jvm.getInt(jvm.type("java_lang_Class").global("_klass_offset"));
@@ -51,23 +49,12 @@ public final class ShellcodeRunner {
                     continue;
                 }
 
-                if (methodDesc.endsWith("V")) {
-                    unsafe.putByte(constMethod + bytecode_offset, (byte) Opcodes.RETURN);
-                } else if (methodDesc.endsWith("I") || methodDesc.endsWith("Z") || methodDesc.endsWith("B") || methodDesc.endsWith("C") || methodDesc.endsWith("S")) {
-                    unsafe.putByte(constMethod + bytecode_offset, (byte) Opcodes.ICONST_0);
-                    unsafe.putByte(constMethod + bytecode_offset + 1, (byte) Opcodes.IRETURN);
-                } else if (methodDesc.endsWith("J")) {
-                    unsafe.putByte(constMethod + bytecode_offset, (byte) Opcodes.LCONST_0);
-                    unsafe.putByte(constMethod + bytecode_offset + 1, (byte) Opcodes.LRETURN);
-                } else if (methodDesc.endsWith("D")) {
-                    unsafe.putByte(constMethod + bytecode_offset, (byte) Opcodes.DCONST_0);
-                    unsafe.putByte(constMethod + bytecode_offset + 1, (byte) Opcodes.DRETURN);
-                } else if (methodDesc.endsWith("F")) {
-                    unsafe.putByte(constMethod + bytecode_offset, (byte) Opcodes.FCONST_0);
-                    unsafe.putByte(constMethod + bytecode_offset + 1, (byte) Opcodes.FRETURN);
+                List<Byte> returnInsn = ClassHelper.getReturn(methodDesc);
+                for (int i1 = 0; i1 < returnInsn.size(); i1++) {
+                    unsafe.putByte(constMethod + bytecode_offset + i1, returnInsn.get(i1));
                 }
             }
-        //}
+        }
     }
 
     private static String getSymbol(long symbolAddress) {

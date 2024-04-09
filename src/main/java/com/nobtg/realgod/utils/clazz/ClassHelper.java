@@ -3,11 +3,14 @@ package com.nobtg.realgod.utils.clazz;
 import com.nobtg.realgod.libs.me.xdark.shell.JVMUtil;
 import com.nobtg.realgod.utils.Triplet;
 import com.nobtg.realgod.utils.file.FileHelper;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.instrument.Instrumentation;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
 import java.net.URLDecoder;
@@ -20,6 +23,7 @@ public final class ClassHelper {
     //                             class   mcp      srg
     private static final List<Triplet<String, String, String>> reNameMap = new ArrayList<>();
     private static final boolean isRunInIDE;
+    public static Instrumentation inst;
 
     static {
         try {
@@ -97,8 +101,8 @@ public final class ClassHelper {
         Optional<String> mapName = Optional.of(mcp);
 
         for (Triplet<String, String, String> map : reNameMap) {
-            if (map.getFirst().equals(className) && map.getSecond().equals(mcp)) {
-                mapName = Optional.of(map.getThird());
+            if (map.first().equals(className) && map.second().equals(mcp)) {
+                mapName = Optional.of(map.third());
                 break;
             }
         }
@@ -108,5 +112,35 @@ public final class ClassHelper {
 
     public static boolean isRunInIDE() {
         return isRunInIDE;
+    }
+
+    public static List<Byte> getReturn(String desc) {
+        List<Byte> insnList = new ArrayList<>();
+        switch (Type.getReturnType(desc).getSort()) {
+            case Type.VOID -> insnList.add((byte) Opcodes.RETURN);
+            case Type.BOOLEAN, Type.CHAR, Type.BYTE, Type.SHORT, Type.INT -> {
+                insnList.add((byte) Opcodes.ICONST_0);
+                insnList.add((byte) Opcodes.IRETURN);
+            }
+            case Type.FLOAT -> {
+                insnList.add((byte) Opcodes.FCONST_0);
+                insnList.add((byte) Opcodes.FRETURN);
+            }
+            case Type.LONG -> {
+                insnList.add((byte) Opcodes.LCONST_0);
+                insnList.add((byte) Opcodes.LRETURN);
+            }
+            case Type.DOUBLE -> {
+                insnList.add((byte) Opcodes.DCONST_0);
+                insnList.add((byte) Opcodes.DRETURN);
+            }
+            case Type.ARRAY, Type.OBJECT -> {
+                insnList.add((byte) Opcodes.ACONST_NULL);
+                insnList.add((byte) Opcodes.ARETURN);
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + Type.getReturnType(desc).getSort());
+        }
+
+        return insnList;
     }
 }

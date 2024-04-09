@@ -1,4 +1,4 @@
-package com.nobtg.realgod.utils;
+package com.nobtg.realgod.utils.unsafe;
 
 import com.nobtg.realgod.utils.file.FileHelper;
 
