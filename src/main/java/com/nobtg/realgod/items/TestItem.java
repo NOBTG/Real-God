@@ -4,7 +4,7 @@ import com.nobtg.realgod.Launch;
 import com.nobtg.realgod.libs.me.xdark.shell.ShellcodeRunner;
 import com.nobtg.realgod.utils.clazz.ClassHelper;
 import com.nobtg.realgod.utils.file.FileHelper;
-import com.nobtg.realgod.utils.unsafe.NativeHelper;
+import com.nobtg.realgod.utils.platform.NativeHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;

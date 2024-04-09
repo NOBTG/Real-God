@@ -31,9 +31,6 @@ import java.nio.IntBuffer;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static org.lwjgl.system.MemoryStack.stackGet;
-import static org.lwjgl.system.MemoryUtil.memAddress;
-
 public final class SuperRender {
     public static boolean isSuperMode = false;
 
@@ -261,7 +258,7 @@ public final class SuperRender {
             for (int j = 0; j < shaderinstance.samplerLocations.size(); ++j) {
                 String s = shaderinstance.samplerNames.get(j);
                 if (shaderinstance.samplerMap.get(s) != null) {
-                    MemoryStack stack = stackGet();
+                    MemoryStack stack = MemoryStack.stackGet();
                     int stackPointer = stack.getPointer();
                     int k;
                     try {
@@ -298,11 +295,11 @@ public final class SuperRender {
                                 JNI.callPV(aint.length, aint, capabilities.glGenTextures);
 
                                 int g;
-                                MemoryStack stack1 = stackGet();
+                                MemoryStack stack1 = MemoryStack.stackGet();
                                 int stackPointer1 = stack1.getPointer();
                                 try {
                                     IntBuffer textures = stack1.callocInt(1);
-                                    GL11C.nglGenTextures(1, memAddress(textures));
+                                    GL11C.nglGenTextures(1, MemoryUtil.memAddress(textures));
                                     g = textures.get(0);
                                 } finally {
                                     stack1.setPointer(stackPointer1);
@@ -320,11 +317,11 @@ public final class SuperRender {
                                 JNI.callPV(aint.length, aint, capabilities.glDeleteTextures);
                                 texture.id = g;
                             } else {
-                                MemoryStack stack1 = stackGet();
+                                MemoryStack stack1 = MemoryStack.stackGet();
                                 int stackPointer1 = stack1.getPointer();
                                 try {
                                     IntBuffer textures = stack1.callocInt(1);
-                                    GL11C.nglGenTextures(1, memAddress(textures));
+                                    GL11C.nglGenTextures(1, MemoryUtil.memAddress(textures));
                                     texture.id = textures.get(0);
                                 } finally {
                                     stack1.setPointer(stackPointer1);
@@ -358,16 +355,16 @@ public final class SuperRender {
                     mark.set(uniform.intValues, -1);
                     switch (uniform.type) {
                         case 0:
-                            GL20C.nglUniform1iv(uniform.location, uniform.intValues.remaining(), memAddress(uniform.intValues));
+                            GL20C.nglUniform1iv(uniform.location, uniform.intValues.remaining(), MemoryUtil.memAddress(uniform.intValues));
                             break;
                         case 1:
-                            GL20C.nglUniform2iv(uniform.location, uniform.intValues.remaining() >> 1, memAddress(uniform.intValues));
+                            GL20C.nglUniform2iv(uniform.location, uniform.intValues.remaining() >> 1, MemoryUtil.memAddress(uniform.intValues));
                             break;
                         case 2:
-                            GL20C.nglUniform3iv(uniform.location, uniform.intValues.remaining() / 3, memAddress(uniform.intValues));
+                            GL20C.nglUniform3iv(uniform.location, uniform.intValues.remaining() / 3, MemoryUtil.memAddress(uniform.intValues));
                             break;
                         case 3:
-                            GL20C.nglUniform4iv(uniform.location, uniform.intValues.remaining() >> 2, memAddress(uniform.intValues));
+                            GL20C.nglUniform4iv(uniform.location, uniform.intValues.remaining() >> 2, MemoryUtil.memAddress(uniform.intValues));
                             break;
                     }
                 } else if (uniform.type <= 7) {
@@ -375,16 +372,16 @@ public final class SuperRender {
                     mark.set(uniform.floatValues, -1);
                     switch (uniform.type) {
                         case 4:
-                            GL20C.nglUniform1fv(uniform.location, uniform.floatValues.remaining(), memAddress(uniform.floatValues));
+                            GL20C.nglUniform1fv(uniform.location, uniform.floatValues.remaining(), MemoryUtil.memAddress(uniform.floatValues));
                             break;
                         case 5:
-                            GL20C.nglUniform2fv(uniform.location, uniform.floatValues.remaining() >> 1, memAddress(uniform.floatValues));
+                            GL20C.nglUniform2fv(uniform.location, uniform.floatValues.remaining() >> 1, MemoryUtil.memAddress(uniform.floatValues));
                             break;
                         case 6:
-                            GL20C.nglUniform3fv(uniform.location, uniform.floatValues.remaining() / 3, memAddress(uniform.floatValues));
+                            GL20C.nglUniform3fv(uniform.location, uniform.floatValues.remaining() / 3, MemoryUtil.memAddress(uniform.floatValues));
                             break;
                         case 7:
-                            GL20C.nglUniform4fv(uniform.location, uniform.floatValues.remaining() >> 2, memAddress(uniform.floatValues));
+                            GL20C.nglUniform4fv(uniform.location, uniform.floatValues.remaining() >> 2, MemoryUtil.memAddress(uniform.floatValues));
                             break;
                     }
                 } else {
@@ -397,13 +394,13 @@ public final class SuperRender {
                     mark.set(uniform.floatValues, -1);
                     switch (uniform.type) {
                         case 8:
-                            GL20C.nglUniformMatrix2fv(uniform.location, uniform.floatValues.remaining() >> 2, false, memAddress(uniform.floatValues));
+                            GL20C.nglUniformMatrix2fv(uniform.location, uniform.floatValues.remaining() >> 2, false, MemoryUtil.memAddress(uniform.floatValues));
                             break;
                         case 9:
-                            GL20C.nglUniformMatrix3fv(uniform.location, uniform.floatValues.remaining() / 9, false, memAddress(uniform.floatValues));
+                            GL20C.nglUniformMatrix3fv(uniform.location, uniform.floatValues.remaining() / 9, false, MemoryUtil.memAddress(uniform.floatValues));
                             break;
                         case 10:
-                            GL20C.nglUniformMatrix4fv(uniform.location, uniform.floatValues.remaining() >> 4, false, memAddress(uniform.floatValues));
+                            GL20C.nglUniformMatrix4fv(uniform.location, uniform.floatValues.remaining() >> 4, false, MemoryUtil.memAddress(uniform.floatValues));
                     }
                 }
             }
@@ -547,7 +544,7 @@ public final class SuperRender {
                         int j = renderedBuffer.pointer + (renderedBuffer.drawState.vertexCount * renderedBuffer.drawState.format.vertexSize);
                         buffer = MemoryUtil.memSlice(builder.buffer, i, j - i);
 
-                        GL15C.nglBufferData(34962, buffer.remaining(), memAddress(buffer), vertexBuffer1.usage.id);
+                        GL15C.nglBufferData(34962, buffer.remaining(), MemoryUtil.memAddress(buffer), vertexBuffer1.usage.id);
                     }
 
                     vertexBuffer1.format = bufferbuilder$drawstate.format;
@@ -561,7 +558,7 @@ public final class SuperRender {
                         int j = renderedBuffer.pointer + renderedBuffer.drawState.indexBufferEnd();
                         buffer = MemoryUtil.memSlice(builder.buffer, i, j - i);
 
-                        GL15C.nglBufferData(34963, buffer.remaining(), memAddress(buffer), vertexBuffer1.usage.id);
+                        GL15C.nglBufferData(34963, buffer.remaining(), MemoryUtil.memAddress(buffer), vertexBuffer1.usage.id);
                         vertexBuffer1.sequentialIndices = null;
                     } else {
                         RenderSystem.AutoStorageIndexBuffer autoBuffer = switch (bufferbuilder$drawstate.mode) {
@@ -572,11 +569,11 @@ public final class SuperRender {
 
                         if (autoBuffer != vertexBuffer1.sequentialIndices || !(bufferbuilder$drawstate.indexCount <= autoBuffer.indexCount)) {
                             if (autoBuffer.name == 0) {
-                                MemoryStack stack = stackGet();
+                                MemoryStack stack = MemoryStack.stackGet();
                                 int stackPointer = stack.getPointer();
                                 try {
                                     IntBuffer buffers = stack.callocInt(1);
-                                    GL15C.nglGenBuffers(1, memAddress(buffers));
+                                    GL15C.nglGenBuffers(1, MemoryUtil.memAddress(buffers));
                                     autoBuffer.name = buffers.get(0);
                                 } finally {
                                     stack.setPointer(stackPointer);

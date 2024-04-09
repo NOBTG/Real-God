@@ -2,14 +2,13 @@ package com.nobtg.realgod.utils.client;
 
 import com.nobtg.realgod.libs.me.xdark.shell.JVMUtil;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.lang.invoke.VarHandle;
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
-
-import static org.joml.Matrix4fc.*;
 
 public final class VirtualMatrix4f {
     public static final VarHandle properties;
@@ -140,25 +139,25 @@ public final class VirtualMatrix4f {
 
     public static Matrix4f m00(Matrix4f matrix, float m00) {
         VirtualMatrix4f.m00.set(matrix, m00);
-        properties.set(matrix, ((int) (properties.get(matrix))) & ~PROPERTY_ORTHONORMAL);
+        properties.set(matrix, ((int) (properties.get(matrix))) & ~Matrix4fc.PROPERTY_ORTHONORMAL);
         if (m00 != 1.0f)
-            properties.set(matrix, ((int) (properties.get(matrix))) & ~(PROPERTY_IDENTITY | PROPERTY_TRANSLATION));
+            properties.set(matrix, ((int) (properties.get(matrix))) & ~(Matrix4fc.PROPERTY_IDENTITY | Matrix4fc.PROPERTY_TRANSLATION));
         return matrix;
     }
 
     public static Matrix4f m01(Matrix4f matrix, float m01) {
         VirtualMatrix4f.m01.set(matrix, m01);
-        properties.set(matrix, ((int) (properties.get(matrix))) & ~PROPERTY_ORTHONORMAL);
+        properties.set(matrix, ((int) (properties.get(matrix))) & ~Matrix4fc.PROPERTY_ORTHONORMAL);
         if (m01 != 0.0f)
-            properties.set(matrix, ((int) (properties.get(matrix))) & ~(PROPERTY_IDENTITY | PROPERTY_PERSPECTIVE | PROPERTY_TRANSLATION));
+            properties.set(matrix, ((int) (properties.get(matrix))) & ~(Matrix4fc.PROPERTY_IDENTITY | Matrix4fc.PROPERTY_PERSPECTIVE | Matrix4fc.PROPERTY_TRANSLATION));
         return matrix;
     }
 
     public static Matrix4f m02(Matrix4f matrix, float m02) {
         VirtualMatrix4f.m02.set(matrix, m02);
-        properties.set(matrix, ((int) (properties.get(matrix))) & ~PROPERTY_ORTHONORMAL);
+        properties.set(matrix, ((int) (properties.get(matrix))) & ~Matrix4fc.PROPERTY_ORTHONORMAL);
         if (m02 != 0.0f)
-            properties.set(matrix, ((int) (properties.get(matrix))) & ~(PROPERTY_IDENTITY | PROPERTY_PERSPECTIVE | PROPERTY_TRANSLATION));
+            properties.set(matrix, ((int) (properties.get(matrix))) & ~(Matrix4fc.PROPERTY_IDENTITY | Matrix4fc.PROPERTY_PERSPECTIVE | Matrix4fc.PROPERTY_TRANSLATION));
         return matrix;
     }
 
@@ -171,25 +170,25 @@ public final class VirtualMatrix4f {
 
     public static Matrix4f m10(Matrix4f matrix, float m10) {
         VirtualMatrix4f.m10.set(matrix, m10);
-        properties.set(matrix, ((int) (properties.get(matrix))) & ~PROPERTY_ORTHONORMAL);
+        properties.set(matrix, ((int) (properties.get(matrix))) & ~Matrix4fc.PROPERTY_ORTHONORMAL);
         if (m10 != 0.0f)
-            properties.set(matrix, ((int) (properties.get(matrix))) & ~(PROPERTY_IDENTITY | PROPERTY_PERSPECTIVE | PROPERTY_TRANSLATION));
+            properties.set(matrix, ((int) (properties.get(matrix))) & ~(Matrix4fc.PROPERTY_IDENTITY | Matrix4fc.PROPERTY_PERSPECTIVE | Matrix4fc.PROPERTY_TRANSLATION));
         return matrix;
     }
 
     public static Matrix4f m11(Matrix4f matrix, float m11) {
         VirtualMatrix4f.m11.set(matrix, m11);
-        properties.set(matrix, ((int) (properties.get(matrix))) & ~PROPERTY_ORTHONORMAL);
+        properties.set(matrix, ((int) (properties.get(matrix))) & ~Matrix4fc.PROPERTY_ORTHONORMAL);
         if (m11 != 1.0f)
-            properties.set(matrix, ((int) (properties.get(matrix))) & ~(PROPERTY_IDENTITY | PROPERTY_TRANSLATION));
+            properties.set(matrix, ((int) (properties.get(matrix))) & ~(Matrix4fc.PROPERTY_IDENTITY | Matrix4fc.PROPERTY_TRANSLATION));
         return matrix;
     }
 
     public static Matrix4f m12(Matrix4f matrix, float m12) {
         VirtualMatrix4f.m12.set(matrix, m12);
-        properties.set(matrix, ((int) (properties.get(matrix))) & ~PROPERTY_ORTHONORMAL);
+        properties.set(matrix, ((int) (properties.get(matrix))) & ~Matrix4fc.PROPERTY_ORTHONORMAL);
         if (m12 != 0.0f)
-            properties.set(matrix, ((int) (properties.get(matrix))) & ~(PROPERTY_IDENTITY | PROPERTY_PERSPECTIVE | PROPERTY_TRANSLATION));
+            properties.set(matrix, ((int) (properties.get(matrix))) & ~(Matrix4fc.PROPERTY_IDENTITY | Matrix4fc.PROPERTY_PERSPECTIVE | Matrix4fc.PROPERTY_TRANSLATION));
         return matrix;
     }
 
@@ -202,62 +201,62 @@ public final class VirtualMatrix4f {
 
     public static Matrix4f m20(Matrix4f matrix, float m20) {
         VirtualMatrix4f.m20.set(matrix, m20);
-        properties.set(matrix, ((int) (properties.get(matrix))) & ~PROPERTY_ORTHONORMAL);
+        properties.set(matrix, ((int) (properties.get(matrix))) & ~Matrix4fc.PROPERTY_ORTHONORMAL);
         if (m20 != 0.0f)
-            properties.set(matrix, ((int) (properties.get(matrix))) & ~(PROPERTY_IDENTITY | PROPERTY_PERSPECTIVE | PROPERTY_TRANSLATION));
+            properties.set(matrix, ((int) (properties.get(matrix))) & ~(Matrix4fc.PROPERTY_IDENTITY | Matrix4fc.PROPERTY_PERSPECTIVE | Matrix4fc.PROPERTY_TRANSLATION));
         return matrix;
     }
 
     public static Matrix4f m21(Matrix4f matrix, float m21) {
         VirtualMatrix4f.m21.set(matrix, m21);
-        properties.set(matrix, ((int) (properties.get(matrix))) & ~PROPERTY_ORTHONORMAL);
+        properties.set(matrix, ((int) (properties.get(matrix))) & ~Matrix4fc.PROPERTY_ORTHONORMAL);
         if (m21 != 0.0f)
-            properties.set(matrix, ((int) (properties.get(matrix))) & ~(PROPERTY_IDENTITY | PROPERTY_PERSPECTIVE | PROPERTY_TRANSLATION));
+            properties.set(matrix, ((int) (properties.get(matrix))) & ~(Matrix4fc.PROPERTY_IDENTITY | Matrix4fc.PROPERTY_PERSPECTIVE | Matrix4fc.PROPERTY_TRANSLATION));
         return matrix;
     }
 
     public static Matrix4f m22(Matrix4f matrix, float m22) {
         VirtualMatrix4f.m22.set(matrix, m22);
-        properties.set(matrix, ((int) (properties.get(matrix))) & ~PROPERTY_ORTHONORMAL);
+        properties.set(matrix, ((int) (properties.get(matrix))) & ~Matrix4fc.PROPERTY_ORTHONORMAL);
         if (m22 != 1.0f)
-            properties.set(matrix, ((int) (properties.get(matrix))) & ~(PROPERTY_IDENTITY | PROPERTY_TRANSLATION));
+            properties.set(matrix, ((int) (properties.get(matrix))) & ~(Matrix4fc.PROPERTY_IDENTITY | Matrix4fc.PROPERTY_TRANSLATION));
         return matrix;
     }
 
     public static Matrix4f m23(Matrix4f matrix, float m23) {
         VirtualMatrix4f.m23.set(matrix, m23);
         if (m23 != 0.0f)
-            properties.set(matrix, ((int) (properties.get(matrix))) & ~(PROPERTY_IDENTITY | PROPERTY_AFFINE | PROPERTY_TRANSLATION | PROPERTY_ORTHONORMAL));
+            properties.set(matrix, ((int) (properties.get(matrix))) & ~(Matrix4fc.PROPERTY_IDENTITY | Matrix4fc.PROPERTY_AFFINE | Matrix4fc.PROPERTY_TRANSLATION | Matrix4fc.PROPERTY_ORTHONORMAL));
         return matrix;
     }
 
     public static Matrix4f m30(Matrix4f matrix, float m30) {
         VirtualMatrix4f.m30.set(matrix, m30);
         if (m30 != 0.0f)
-            properties.set(matrix, ((int) (properties.get(matrix))) & ~(PROPERTY_IDENTITY | PROPERTY_PERSPECTIVE));
+            properties.set(matrix, ((int) (properties.get(matrix))) & ~(Matrix4fc.PROPERTY_IDENTITY | Matrix4fc.PROPERTY_PERSPECTIVE));
         return matrix;
     }
 
     public static Matrix4f m31(Matrix4f matrix, float m31) {
         VirtualMatrix4f.m31.set(matrix, m31);
         if (m31 != 0.0f)
-            properties.set(matrix, ((int) (properties.get(matrix))) & ~(PROPERTY_IDENTITY | PROPERTY_PERSPECTIVE));
+            properties.set(matrix, ((int) (properties.get(matrix))) & ~(Matrix4fc.PROPERTY_IDENTITY | Matrix4fc.PROPERTY_PERSPECTIVE));
         return matrix;
     }
 
     public static Matrix4f m32(Matrix4f matrix, float m32) {
         VirtualMatrix4f.m32.set(matrix, m32);
         if (m32 != 0.0f)
-            properties.set(matrix, ((int) (properties.get(matrix))) & ~(PROPERTY_IDENTITY | PROPERTY_PERSPECTIVE));
+            properties.set(matrix, ((int) (properties.get(matrix))) & ~(Matrix4fc.PROPERTY_IDENTITY | Matrix4fc.PROPERTY_PERSPECTIVE));
         return matrix;
     }
 
     public static Matrix4f m33(Matrix4f matrix, float m33) {
         VirtualMatrix4f.m33.set(matrix, m33);
         if (m33 != 0.0f)
-            properties.set(matrix, ((int) (properties.get(matrix))) & ~(PROPERTY_PERSPECTIVE));
+            properties.set(matrix, ((int) (properties.get(matrix))) & ~(Matrix4fc.PROPERTY_PERSPECTIVE));
         if (m33 != 1.0f)
-            properties.set(matrix, ((int) (properties.get(matrix))) & ~(PROPERTY_IDENTITY | PROPERTY_TRANSLATION | PROPERTY_ORTHONORMAL | PROPERTY_AFFINE));
+            properties.set(matrix, ((int) (properties.get(matrix))) & ~(Matrix4fc.PROPERTY_IDENTITY | Matrix4fc.PROPERTY_TRANSLATION | Matrix4fc.PROPERTY_ORTHONORMAL | Matrix4fc.PROPERTY_AFFINE));
         return matrix;
     }
 
@@ -326,7 +325,7 @@ public final class VirtualMatrix4f {
     }
 
     public static void translation(Matrix4f matrix, float x, float y, float z) {
-        if ((((int) (properties.get(matrix))) & PROPERTY_IDENTITY) == 0) {
+        if ((((int) (properties.get(matrix))) & Matrix4fc.PROPERTY_IDENTITY) == 0) {
             try {
                 identity.invoke(memUtilInstance, matrix);
             } catch (Throwable e) {
@@ -336,7 +335,7 @@ public final class VirtualMatrix4f {
         _m30(matrix, x);
         _m31(matrix, y);
         _m32(matrix, z);
-        _properties(matrix, PROPERTY_AFFINE | PROPERTY_TRANSLATION | PROPERTY_ORTHONORMAL);
+        _properties(matrix, Matrix4fc.PROPERTY_AFFINE | Matrix4fc.PROPERTY_TRANSLATION | Matrix4fc.PROPERTY_ORTHONORMAL);
     }
 
     public static void get(Matrix4f matrix, FloatBuffer buffer) {
@@ -348,7 +347,7 @@ public final class VirtualMatrix4f {
     }
 
     public static void setOrtho(Matrix4f matrix, float left, float right, float bottom, float top, float zNear, float zFar, boolean zZeroToOne) {
-        if ((((int) (properties.get(matrix))) & PROPERTY_IDENTITY) == 0) {
+        if ((((int) (properties.get(matrix))) & Matrix4fc.PROPERTY_IDENTITY) == 0) {
             try {
                 identity.invoke(memUtilInstance, matrix);
             } catch (Throwable e) {
@@ -361,6 +360,6 @@ public final class VirtualMatrix4f {
         _m30(matrix, (right + left) / (left - right));
         _m31(matrix, (top + bottom) / (bottom - top));
         _m32(matrix, (zZeroToOne ? zNear : (zFar + zNear)) / (zNear - zFar));
-        _properties(matrix, PROPERTY_AFFINE);
+        _properties(matrix, Matrix4fc.PROPERTY_AFFINE);
     }
 }

@@ -2,7 +2,6 @@ package com.realgodcoremod.core;
 
 import cpw.mods.modlauncher.LaunchPluginHandler;
 import cpw.mods.modlauncher.Launcher;
-import cpw.mods.modlauncher.TransformingClassLoader;
 import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
@@ -16,7 +15,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 public final class RealGodTransformationService implements ITransformationService {
-    public static final TransformingClassLoader classLoader;
+    public static final MethodHandles.Lookup LOOKUP;
 
     @Override
     public @NotNull String name() {
@@ -68,10 +67,6 @@ public final class RealGodTransformationService implements ITransformationServic
         };
         newMap.putAll(((Map<String, ILaunchPluginService>) pluginsVar.get(launchPlugins)));
         pluginsVar.set(launchPlugins, newMap);
-        try {
-            classLoader = (TransformingClassLoader) lookup.findVarHandle(Launcher.class, "classLoader", TransformingClassLoader.class).get(Launcher.INSTANCE);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+        LOOKUP = lookup;
     }
 }
