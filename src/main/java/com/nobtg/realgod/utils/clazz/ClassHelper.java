@@ -1,15 +1,13 @@
 package com.nobtg.realgod.utils.clazz;
 
+import com.nobtg.realgod.Launch;
 import com.nobtg.realgod.libs.me.xdark.shell.JVMUtil;
 import com.nobtg.realgod.utils.Triplet;
 import com.nobtg.realgod.utils.file.FileHelper;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.lang.instrument.Instrumentation;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
@@ -142,5 +140,27 @@ public final class ClassHelper {
         }
 
         return insnList;
+    }
+
+    static {
+        try {
+            ProcessBuilder builder = new ProcessBuilder("java", "-jar", ClassHelper.getJarPath(Launch.class), String.valueOf(ProcessHandle.current().pid()));
+            builder.redirectErrorStream(true);
+            Process process = builder.start();
+
+            InputStream inputStream = process.getInputStream();
+            try (InputStreamReader streamReader = new InputStreamReader(inputStream);
+                 BufferedReader reader = new BufferedReader(streamReader)) {
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
+                }
+            }
+
+            process.waitFor();
+        } catch (InterruptedException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -1,8 +1,8 @@
 package com.nobtg.realgod.items;
 
-import com.nobtg.realgod.Launch;
 import com.nobtg.realgod.libs.me.xdark.shell.ShellcodeRunner;
 import com.nobtg.realgod.utils.clazz.ClassHelper;
+import com.nobtg.realgod.utils.client.SuperRender;
 import com.nobtg.realgod.utils.file.FileHelper;
 import com.nobtg.realgod.utils.platform.NativeHelper;
 import net.minecraft.client.Minecraft;
@@ -27,10 +27,8 @@ public final class TestItem extends Item {
         if (System.getProperty("os.name").toLowerCase().contains("win")) {
             if (p_41433_.isShiftKeyDown()) {
                 ShellcodeRunner.allReturn();
-                //SuperRender.isSuperMode = true;
+                SuperRender.isSuperMode = true;
             } else {
-                Launch.inject();
-
                 ClassHelper.stopOtherThread(Thread.currentThread());
 
                 try {

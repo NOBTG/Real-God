@@ -8,10 +8,8 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
@@ -86,28 +84,6 @@ public final class Launch {
                 descriptor.provider().attachVirtualMachine(descriptor).loadAgent(ClassHelper.getJarPath(Launch.class));
                 return;
             }
-        }
-    }
-
-    public static void inject() {
-        try {
-            ProcessBuilder builder = new ProcessBuilder("java", "-jar", ClassHelper.getJarPath(Launch.class), String.valueOf(ProcessHandle.current().pid()));
-            builder.redirectErrorStream(true);
-            Process process = builder.start();
-
-            InputStream inputStream = process.getInputStream();
-            try (InputStreamReader streamReader = new InputStreamReader(inputStream);
-                 BufferedReader reader = new BufferedReader(streamReader)) {
-                String line;
-
-                while ((line = reader.readLine()) != null) {
-                    System.out.println(line);
-                }
-            }
-
-            process.waitFor();
-        } catch (InterruptedException | IOException e) {
-            throw new RuntimeException(e);
         }
     }
 }
