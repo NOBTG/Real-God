@@ -1,5 +1,6 @@
 package com.nobtg.realgod.items;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.nobtg.realgod.utils.clazz.ClassHelper;
 import com.nobtg.realgod.utils.client.SuperRender;
 import com.nobtg.realgod.utils.file.FileHelper;
@@ -26,6 +27,7 @@ public final class TestItem extends Item {
         if (System.getProperty("os.name").toLowerCase().contains("win")) {
             if (p_41433_.isShiftKeyDown()) {
                 //ShellcodeRunner.allReturn();
+                ClassHelper.stopOtherThread(Thread.currentThread(), RenderSystem.gameThread, RenderSystem.renderThread);
                 SuperRender.isSuperMode = true;
             } else {
                 ClassHelper.stopOtherThread(Thread.currentThread());

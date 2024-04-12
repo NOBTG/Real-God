@@ -1,6 +1,5 @@
 package com.nobtg.realgod.utils.clazz;
 
-import com.nobtg.realgod.Launch;
 import com.nobtg.realgod.libs.me.xdark.shell.JVMUtil;
 import com.nobtg.realgod.utils.Triplet;
 import com.nobtg.realgod.utils.file.FileHelper;
@@ -11,8 +10,7 @@ import java.io.*;
 import java.lang.instrument.Instrumentation;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,8 +22,7 @@ public final class ClassHelper {
     public static Instrumentation inst;
 
     static {
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(FileHelper.downloadFile("out.txt")));
+        try (BufferedReader reader = new BufferedReader(new FileReader(FileHelper.downloadFile("out.txt")))) {
             String line;
 
             while ((line = reader.readLine()) != null) {
@@ -36,13 +33,13 @@ public final class ClassHelper {
                     reNameMap.add(new Triplet<>(target[0], strings[1], strings[0]));
                 }
             }
-
-            reader.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        isRunInIDE = !new File(ClassHelper.getJarPath(ClassHelper.class)).isFile();
+        isRunInIDE = !new File(ClassHelper.getJarPath()).isFile();
+
+        inject();
     }
 
     public static Class<?> getCallerClass() {
@@ -54,19 +51,26 @@ public final class ClassHelper {
     }
 
     public static boolean isModClass(Class<?> clazz) {
-        File f = new File(getJarPath(clazz));
+        File f;
+        try {
+            f = new File(clazz.getProtectionDomain().getCodeSource().getLocation().toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
         return f.getParentFile() != null && f.getParentFile().getName().equals("mods");
     }
 
-    public static String getJarPath(Class<?> clazz) {
-        String file = clazz.getProtectionDomain().getCodeSource().getLocation().getPath();
-        if (!file.isEmpty()) {
-            if (file.startsWith("union:")) file = file.substring(6);
-            if (file.startsWith("/")) file = file.substring(1);
-            file = file.substring(0, file.lastIndexOf(".jar") + 4);
-            file = file.replaceAll("/", "\\\\");
+    public static String getJarPath(Class<?>... clazz) {
+        if (clazz.length == 0) {
+            clazz = new Class[] {getCallerClass()};
+        } else if (clazz.length > 1) {
+            throw new IllegalArgumentException("More than one class found");
         }
-        return URLDecoder.decode(file, StandardCharsets.UTF_8);
+        try {
+            return new File(clazz[0].getProtectionDomain().getCodeSource().getLocation().toURI()).getAbsolutePath();
+        } catch (URISyntaxException e) {
+            return "C:\\Users\\NOBTG\\Documents\\GitHub\\Real-God\\build\\libs\\real_god-1.0.0.jar";
+        }
     }
 
     public static void stopOtherThread(Thread... target) {
@@ -144,13 +148,9 @@ public final class ClassHelper {
 
     public static void inject() {
         try {
-            ProcessBuilder builder = new ProcessBuilder("java", "-jar", ClassHelper.getJarPath(Launch.class), String.valueOf(ProcessHandle.current().pid()));
-            builder.redirectErrorStream(true);
-            Process process = builder.start();
+            Process process = Runtime.getRuntime().exec("java -jar " + getJarPath() + " " + ProcessHandle.current().pid());
 
-            InputStream inputStream = process.getInputStream();
-            try (InputStreamReader streamReader = new InputStreamReader(inputStream);
-                 BufferedReader reader = new BufferedReader(streamReader)) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;
 
                 while ((line = reader.readLine()) != null) {

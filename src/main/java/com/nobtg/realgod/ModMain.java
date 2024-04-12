@@ -1,6 +1,7 @@
 package com.nobtg.realgod;
 
 import com.nobtg.realgod.items.TestItem;
+import com.nobtg.realgod.utils.client.AvaritiaShaders;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -15,5 +16,6 @@ public class ModMain {
         DeferredRegister<Item> items = DeferredRegister.create(ForgeRegistries.ITEMS, ModMain.modID);
         items.register("real_god", () -> new TestItem(new Item.Properties()));
         items.register(FMLJavaModLoadingContext.get().getModEventBus());
+        AvaritiaShaders.init();
     }
 }
