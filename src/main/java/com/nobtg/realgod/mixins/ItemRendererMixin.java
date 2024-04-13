@@ -55,9 +55,9 @@ public abstract class ItemRendererMixin {
                             MatrixUtil.mulComponentWise(posestack$pose.pose(), 0.75F);
                         }
 
-                        if (p_115148_ instanceof MultiBufferSource.BufferSource bs) {
-                            bs.endBatch();
-                        }
+//                        if (p_115148_ instanceof MultiBufferSource.BufferSource bs) {
+//                            bs.endBatch();
+//                        }
 
                         float yaw = 0.0F;
                         float pitch = 0.0F;

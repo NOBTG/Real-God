@@ -17,14 +17,14 @@ import javax.annotation.Nullable;
 public final class CoreHelper {
     public static void glfwSwapBuffers(@NativeType("GLFWwindow *") long window) {
         if (SuperRender.isSuperMode) {
-            SuperRender.renderSuper();
+            SuperRender.betaRenderSuper();
         }
         GLFW.glfwSwapBuffers(window);
     }
 
     public static void invokePV(long param0, long __functionAddress) {
         if (SuperRender.isSuperMode) {
-            SuperRender.renderSuper();
+            SuperRender.betaRenderSuper();
         }
         JNI.invokePV(param0, __functionAddress);
     }

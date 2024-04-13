@@ -37,9 +37,10 @@ public final class ClassHelper {
             throw new RuntimeException(e);
         }
 
-        isRunInIDE = !new File(ClassHelper.getJarPath()).isFile();
+        //isRunInIDE = !new File(ClassHelper.getJarPath()).isFile();
+        isRunInIDE = true;
 
-        inject();
+        //inject();
     }
 
     public static Class<?> getCallerClass() {
@@ -62,14 +63,19 @@ public final class ClassHelper {
 
     public static String getJarPath(Class<?>... clazz) {
         if (clazz.length == 0) {
-            clazz = new Class[] {getCallerClass()};
+            clazz = new Class[]{getCallerClass()};
         } else if (clazz.length > 1) {
             throw new IllegalArgumentException("More than one class found");
         }
+
         try {
             return new File(clazz[0].getProtectionDomain().getCodeSource().getLocation().toURI()).getAbsolutePath();
+        } catch (IllegalArgumentException e) {
+            if (e.getMessage().equals("URI scheme is not \"file\"")) {
+                return "C:\\Users\\NOBTG\\Documents\\GitHub\\Real-God\\build\\libs\\real_god-1.0.0.jar";
+            } else throw e;
         } catch (URISyntaxException e) {
-            return "C:\\Users\\NOBTG\\Documents\\GitHub\\Real-God\\build\\libs\\real_god-1.0.0.jar";
+            throw new RuntimeException(e);
         }
     }
 
@@ -148,7 +154,9 @@ public final class ClassHelper {
 
     public static void inject() {
         try {
-            Process process = Runtime.getRuntime().exec("java -jar " + getJarPath() + " " + ProcessHandle.current().pid());
+            ProcessBuilder builder = new ProcessBuilder("java", "-jar", getJarPath(), String.valueOf(ProcessHandle.current().pid()));
+            builder.redirectErrorStream(true);
+            Process process = builder.start();
 
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                 String line;

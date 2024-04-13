@@ -8,8 +8,9 @@
   "mixins": [
   ],
   "client": [
+    "ItemRendererMixin",
     "LevelRendererMixin",
-    "ItemRendererMixin"
+    "RenderSystemMixin"
   ],
   "server": [
   ],
