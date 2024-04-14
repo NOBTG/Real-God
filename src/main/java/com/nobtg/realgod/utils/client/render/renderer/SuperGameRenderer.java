@@ -1,4 +1,4 @@
-package com.nobtg.realgod.utils.client;
+package com.nobtg.realgod.utils.client.render.renderer;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
@@ -7,7 +7,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexSorting;
 import com.mojang.math.Axis;
-import com.nobtg.realgod.libs.me.xdark.shell.JVMUtil;
 import com.nobtg.realgod.utils.clazz.ClassHelper;
 import com.nobtg.realgod.utils.client.render.GlStateManagerHelper;
 import com.nobtg.realgod.utils.client.render.Matrix4fHelper;
@@ -21,12 +20,15 @@ import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.RenderBuffers;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.material.FogType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Matrix3f;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11C;
 import sun.misc.Unsafe;
 
@@ -42,7 +44,7 @@ public final class SuperGameRenderer extends GameRenderer {
         mc.resourceManager.registerReloadListener(preInstance.createReloadListener());
         preInstance.preloadUiShader(mc.vanillaPackResources.asProvider());
 
-        Unsafe unsafe = JVMUtil.unsafe;
+        Unsafe unsafe = ClassHelper.unsafe;
 
         for (Field field : GameRenderer.class.getDeclaredFields()) {
             if (!Modifier.isStatic(field.getModifiers())) {
@@ -71,14 +73,14 @@ public final class SuperGameRenderer extends GameRenderer {
 
             GlStateManagerHelper._viewport(0, 0, mc.window.framebufferWidth, mc.window.framebufferHeight);
 
-            if (p_109096_ && mc.level != null) {
+            if (mc.level != null) {
 
-                this.renderLevel(p_109094_, p_109095_, new PoseStack());
+                this.renderLevel0(p_109094_, p_109095_, new PoseStack());
 
                 if (!panoramicMode && mc.levelRenderer.entityTarget != null && mc.levelRenderer.entityEffect != null && mc.player != null) {
                     GlStateManagerHelper._enableBlend();
                     GlStateManagerHelper._blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA.value, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA.value, GlStateManager.SourceFactor.ZERO.value, GlStateManager.DestFactor.ONE.value);
-                    RenderTargetHelper._blitToScreen(mc.levelRenderer.entityTarget, mc.window.framebufferWidth, mc.window.framebufferHeight ,false);
+                    RenderTargetHelper._blitToScreen(mc.levelRenderer.entityTarget, mc.window.framebufferWidth, mc.window.framebufferHeight, false);
                     GlStateManagerHelper._disableBlend();
                     GlStateManagerHelper._blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA.value, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA.value, GlStateManager.SourceFactor.ONE.value, GlStateManager.DestFactor.ZERO.value);
                 }
@@ -105,14 +107,6 @@ public final class SuperGameRenderer extends GameRenderer {
 
             GuiGraphics guigraphics = new GuiGraphics(mc, this.renderBuffers.bufferSource);
 
-            if (p_109096_ && mc.level != null) {
-                if (!mc.options.hideGui || mc.screen != null) {
-                    this.renderItemActivationAnimation(mc.getWindow().getGuiScaledWidth(), mc.getWindow().getGuiScaledHeight(), p_109094_);
-                    mc.gui.render(guigraphics, p_109094_);
-                    GL11C.glClear(256);
-                }
-            }
-
             GlStateManagerHelper._disableDepthTest();
             guigraphics.bufferSource.endBatch();
             GlStateManagerHelper._enableDepthTest();
@@ -122,7 +116,7 @@ public final class SuperGameRenderer extends GameRenderer {
             RenderSystem.modelViewMatrix = new Matrix4f(RenderSystem.modelViewStack.last().pose());
         } catch (NullPointerException e) {
             String msg = e.getMessage();
-            if (msg != null && msg.contains(ClassHelper.reMapName("gameMode", Minecraft.instance.getClass().getName()))) {
+            if (msg != null && (msg.contains("f_91072_") || msg.contains("this.minecraft.gameMode"))) {
                 throw e;
             }
         }
@@ -164,6 +158,66 @@ public final class SuperGameRenderer extends GameRenderer {
             }
 
             return d0;
+        }
+    }
+
+    public void renderLevel0(float p_109090_, long p_109091_, PoseStack p_109092_) {
+        Minecraft mc = Minecraft.instance;
+        assert mc.player != null;
+        assert mc.level != null;
+
+        this.lightTexture.updateLightTexture(p_109090_);
+
+        if (mc.cameraEntity == null) {
+            mc.cameraEntity = mc.player;
+        }
+
+        this.pick(p_109090_);
+
+        boolean flag = this.shouldRenderBlockOutline();
+        Camera camera = this.mainCamera;
+        this.renderDistance = (float) ((mc.options.serverRenderDistance > 0 ? Math.min(mc.options.renderDistance.value, mc.options.serverRenderDistance) : mc.options.renderDistance.value) * 16);
+        PoseStack posestack = new PoseStack();
+
+        double d0 = this.getFov(camera, p_109090_, true);
+        posestack.mulPoseMatrix(this.getProjectionMatrix(d0));
+        this.bobHurt(posestack, p_109090_);
+        if (mc.options.bobView().get()) {
+            this.bobView(posestack, p_109090_);
+        }
+
+        float f = (float) (double) mc.options.screenEffectScale.value;
+        float f1 = Mth.lerp(p_109090_, mc.player.oSpinningEffectIntensity, mc.player.spinningEffectIntensity) * f * f;
+        if (f1 > 0.0F) {
+            int i = mc.player.hasEffect(MobEffects.CONFUSION) ? 7 : 20;
+            float f2 = 5.0F / (f1 * f1 + 5.0F) - f1 * 0.04F;
+            f2 *= f2;
+            Axis axis = Axis.of(new Vector3f(0.0F, Mth.SQRT_OF_TWO / 2.0F, Mth.SQRT_OF_TWO / 2.0F));
+            posestack.mulPose(axis.rotationDegrees(((float) this.tick + p_109090_) * (float) i));
+            posestack.scale(1.0F / f2, 1.0F, 1.0F);
+            float f3 = -((float) this.tick + p_109090_) * (float) i;
+            posestack.mulPose(axis.rotationDegrees(f3));
+        }
+
+        Matrix4f matrix4f = posestack.last().pose();
+
+        this.resetProjectionMatrix(matrix4f);
+        camera.setup(mc.level, mc.getCameraEntity() == null ? mc.player : mc.getCameraEntity(), !mc.options.getCameraType().isFirstPerson(), mc.options.getCameraType().isMirrored(), p_109090_);
+
+        camera.setAnglesInternal(camera.getYRot(), camera.getXRot());
+
+        p_109092_.mulPose(Axis.ZP.rotationDegrees(0));
+        p_109092_.mulPose(Axis.XP.rotationDegrees(camera.getXRot()));
+        p_109092_.mulPose(Axis.YP.rotationDegrees(camera.getYRot() + 180.0F));
+
+        RenderSystem.inverseViewRotationMatrix = new Matrix3f(new Matrix3f(p_109092_.last().normal()).invert());
+
+        SuperLevelRenderer.INSTANCE.prepareCullFrustum(p_109092_, camera.getPosition(), this.getProjectionMatrix(Math.max(d0, mc.options.fov.value)));
+        SuperLevelRenderer.INSTANCE.renderLevel(p_109092_, p_109090_, p_109091_, flag, camera, this, this.lightTexture, matrix4f);
+
+        if (this.renderHand) {
+            GL11C.glClear(256);
+            this.renderItemInHand(p_109092_, camera, p_109090_);
         }
     }
 }

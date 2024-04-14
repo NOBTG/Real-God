@@ -1,7 +1,7 @@
 package com.nobtg.realgod.utils.client.render;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.nobtg.realgod.libs.me.xdark.shell.JVMUtil;
+import com.nobtg.realgod.utils.clazz.ClassHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.opengl.*;
@@ -173,7 +173,7 @@ public final class GlStateManagerHelper {
 
     private static GLCapabilities getICD() {
         try {
-            return ((GLCapabilities) JVMUtil.lookup.findStaticVarHandle(Class.forName("org.lwjgl.opengl.GL$ICDStatic$WriteOnce"), "caps", GLCapabilities.class).get());
+            return ((GLCapabilities) ClassHelper.lookup.findStaticVarHandle(Class.forName("org.lwjgl.opengl.GL$ICDStatic$WriteOnce"), "caps", GLCapabilities.class).get());
         } catch (NoSuchFieldException | IllegalAccessException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }

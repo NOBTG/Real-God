@@ -1,6 +1,8 @@
 package com.nobtg.realgod.utils.client.render;
 
-import com.nobtg.realgod.libs.me.xdark.shell.JVMUtil;
+import com.nobtg.realgod.utils.clazz.ClassHelper;
+import com.nobtg.realgod.utils.client.render.memory.MemUtilNIOHelper;
+import com.nobtg.realgod.utils.client.render.memory.MemUtilUnsafeHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Math;
@@ -33,7 +35,7 @@ public final class Matrix4fHelper {
     private static final Object memUtilInstance;
 
     static {
-        MethodHandles.Lookup lookup = JVMUtil.lookup;
+        MethodHandles.Lookup lookup = ClassHelper.lookup;
         try {
             properties = lookup.findVarHandle(Matrix4f.class, "properties", int.class);
             m00 = lookup.findVarHandle(Matrix4f.class, "m00", float.class);

@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.VertexSorting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ShaderInstance;
 import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL11C;
 import org.lwjgl.opengl.GL30C;
 
 public final class RenderTargetHelper {
@@ -70,5 +71,25 @@ public final class RenderTargetHelper {
         if (p_83962_) {
             GlStateManagerHelper._viewport(0, 0, target.viewWidth, target.viewHeight);
         }
+    }
+
+    public static void clear(RenderTarget target) {
+        _bindWrite(target, true);
+        GL11C.glClearColor(target.clearChannels[0], target.clearChannels[1], target.clearChannels[2], target.clearChannels[3]);
+        int i = 16384;
+        if (target.useDepth) {
+            GL11C.glClearDepth(1.0D);
+            i |= 256;
+        }
+
+        GL11C.glClear(i);
+        GL30C.glBindFramebuffer(36160, 0);
+    }
+
+    public static void copyDepthFrom(RenderTarget target, RenderTarget p_83946_) {
+        GL30C.glBindFramebuffer(36008, p_83946_.frameBufferId);
+        GL30C.glBindFramebuffer(36009, target.frameBufferId);
+        GL30C.glBlitFramebuffer(0, 0, p_83946_.width, p_83946_.height, 0, 0, target.width, target.height, 256, 9728);
+        GL30C.glBindFramebuffer(36160, 0);
     }
 }

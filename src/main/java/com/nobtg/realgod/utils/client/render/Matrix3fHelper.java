@@ -1,6 +1,6 @@
 package com.nobtg.realgod.utils.client.render;
 
-import com.nobtg.realgod.libs.me.xdark.shell.JVMUtil;
+import com.nobtg.realgod.utils.clazz.ClassHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Matrix3f;
@@ -21,7 +21,7 @@ public final class Matrix3fHelper {
     private static final VarHandle m22;
 
     static {
-        MethodHandles.Lookup lookup = JVMUtil.lookup;
+        MethodHandles.Lookup lookup = ClassHelper.lookup;
         try {
             m00 = lookup.findVarHandle(Matrix3f.class, "m00", float.class);
             m01 = lookup.findVarHandle(Matrix3f.class, "m01", float.class);
@@ -35,78 +35,6 @@ public final class Matrix3fHelper {
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static float m00(Matrix3f matrix3f) {
-        return (float) m00.get(matrix3f);
-    }
-
-    public static float m01(Matrix3f matrix3f) {
-        return (float) m01.get(matrix3f);
-    }
-
-    public static float m02(Matrix3f matrix3f) {
-        return (float) m02.get(matrix3f);
-    }
-
-    public static float m10(Matrix3f matrix3f) {
-        return (float) m10.get(matrix3f);
-    }
-
-    public static float m11(Matrix3f matrix3f) {
-        return (float) m11.get(matrix3f);
-    }
-
-    public static float m12(Matrix3f matrix3f) {
-        return (float) m12.get(matrix3f);
-    }
-
-    public static float m20(Matrix3f matrix3f) {
-        return (float) m20.get(matrix3f);
-    }
-
-    public static float m21(Matrix3f matrix3f) {
-        return (float) m21.get(matrix3f);
-    }
-
-    public static float m22(Matrix3f matrix3f) {
-        return (float) m22.get(matrix3f);
-    }
-
-    public static void m00(Matrix3f matrix3f, float m00) {
-        Matrix3fHelper.m00.set(matrix3f, m00);
-    }
-
-    public static void m01(Matrix3f matrix3f, float m01) {
-        Matrix3fHelper.m01.set(matrix3f, m01);
-    }
-
-    public static void m02(Matrix3f matrix3f, float m02) {
-        Matrix3fHelper.m02.set(matrix3f, m02);
-    }
-
-    public static void m10(Matrix3f matrix3f, float m10) {
-        Matrix3fHelper.m10.set(matrix3f, m10);
-    }
-
-    public static void m11(Matrix3f matrix3f, float m11) {
-        Matrix3fHelper.m11.set(matrix3f, m11);
-    }
-
-    public static void m12(Matrix3f matrix3f, float m12) {
-        Matrix3fHelper.m12.set(matrix3f, m12);
-    }
-
-    public static void m20(Matrix3f matrix3f, float m20) {
-        Matrix3fHelper.m20.set(matrix3f, m20);
-    }
-
-    public static void m21(Matrix3f matrix3f, float m21) {
-        Matrix3fHelper.m21.set(matrix3f, m21);
-    }
-
-    public static void m22(Matrix3f matrix3f, float m22) {
-        Matrix3fHelper.m22.set(matrix3f, m22);
     }
 
     public static void _m00(Matrix3f matrix3f, float m00) {

@@ -25,7 +25,7 @@ public final class PoseStackHelper {
 
     public static void translate(PoseStack stack, float p_254202_, float p_253782_, float p_254238_) {
         PoseStack.Pose posestack$pose = stack.poseStack.getLast();
-        Matrix4fHelper.translation(posestack$pose.pose, p_254202_, p_253782_, p_254238_);
+        Matrix4fHelper.translate(posestack$pose.pose, p_254202_, p_253782_, p_254238_);
     }
 
     public static void popPose(PoseStack stack) {

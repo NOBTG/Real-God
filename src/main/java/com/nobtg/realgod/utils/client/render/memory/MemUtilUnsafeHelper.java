@@ -1,6 +1,6 @@
-package com.nobtg.realgod.utils.client.render;
+package com.nobtg.realgod.utils.client.render.memory;
 
-import com.nobtg.realgod.libs.me.xdark.shell.JVMUtil;
+import com.nobtg.realgod.utils.clazz.ClassHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Matrix4f;
@@ -15,20 +15,20 @@ public final class MemUtilUnsafeHelper {
     static {
         try {
             Class<?> clazz = Class.forName("org.joml.MemUtil$MemUtilUnsafe");
-            ADDRESS = (long) JVMUtil.lookup.findStaticVarHandle(clazz, "ADDRESS", long.class).get();
-            Matrix4f_m00 = (long) JVMUtil.lookup.findStaticVarHandle(clazz, "Matrix4f_m00", long.class).get();
+            ADDRESS = (long) ClassHelper.lookup.findStaticVarHandle(clazz, "ADDRESS", long.class).get();
+            Matrix4f_m00 = (long) ClassHelper.lookup.findStaticVarHandle(clazz, "Matrix4f_m00", long.class).get();
         } catch (NoSuchFieldException | IllegalAccessException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
 
     public static void put(Matrix4f m, int offset, FloatBuffer dest) {
-        put(m, JVMUtil.unsafe.getLong(dest, ADDRESS) + ((long) offset << 2));
+        put(m, ClassHelper.unsafe.getLong(dest, ADDRESS) + ((long) offset << 2));
     }
 
     public static void put(Matrix4f m, long destAddr) {
         for (int i = 0; i < 8; i++) {
-            JVMUtil.unsafe.putLong(null, destAddr + (i << 3), JVMUtil.unsafe.getLong(m, Matrix4f_m00 + (i << 3)));
+            ClassHelper.unsafe.putLong(null, destAddr + (i << 3), ClassHelper.unsafe.getLong(m, Matrix4f_m00 + (i << 3)));
         }
     }
 }
