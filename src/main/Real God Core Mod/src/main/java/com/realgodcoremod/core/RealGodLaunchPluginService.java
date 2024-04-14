@@ -1,19 +1,13 @@
 package com.realgodcoremod.core;
 
-import cpw.mods.modlauncher.TransformingClassLoader;
 import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
-import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.EnumSet;
 
 public final class RealGodLaunchPluginService implements ILaunchPluginService {
-    private static final Method buildTransformedClassNodeFor;
-
     @Override
     public String name() {
         return "RealGodILaunchPluginService";
@@ -21,7 +15,7 @@ public final class RealGodLaunchPluginService implements ILaunchPluginService {
 
     @Override
     public EnumSet<Phase> handlesClass(Type classType, boolean isEmpty) {
-        return EnumSet.of(Phase.AFTER);
+        return EnumSet.of(Phase.BEFORE);
     }
 
     @Override
@@ -49,21 +43,19 @@ public final class RealGodLaunchPluginService implements ILaunchPluginService {
                             apply(methodInsn);
                             modify = true;
                         }
-                    } else if (isAssignableFrom(methodInsn.owner, "net/minecraft/world/entity/LivingEntity")) {
-                        if ((methodInsn.name.equals("getHealth") || methodInsn.name.equals("m_21223_")) && methodInsn.desc.equals("()F")) {
-                            apply(methodInsn, "getHealth", "(Lnet/minecraft/world/entity/LivingEntity;)F");
-                            modify = true;
-                        } else if ((methodInsn.name.equals("isDeadOrDying") || methodInsn.name.equals("m_21224_")) && methodInsn.desc.equals("()Z")) {
-                            apply(methodInsn, "isDeadOrDying", "(Lnet/minecraft/world/entity/LivingEntity;)Z");
-                            modify = true;
-                        } else if ((methodInsn.name.equals("isAlive") || methodInsn.name.equals("m_6084_")) && methodInsn.desc.equals("()Z")) {
-                            apply(methodInsn, "isAlive", "(Lnet/minecraft/world/entity/LivingEntity;)Z");
-                            modify = true;
-                        }
+                    } else if (methodInsn.name.equals("m_21223_") && methodInsn.desc.equals("()F")) {
+                        apply(methodInsn, "getHealth", "(Lnet/minecraft/world/entity/LivingEntity;)F");
+                        modify = true;
+                    } else if (methodInsn.name.equals("m_21224_") && methodInsn.desc.equals("()Z")) {
+                        apply(methodInsn, "isDeadOrDying", "(Lnet/minecraft/world/entity/LivingEntity;)Z");
+                        modify = true;
+                    } else if (methodInsn.name.equals("m_6084_") && methodInsn.desc.equals("()Z")) {
+                        apply(methodInsn, "isAlive", "(Lnet/minecraft/world/entity/Entity;)Z");
+                        modify = true;
                     }
                 } else if (insn instanceof FieldInsnNode fieldInsn) {
                     if (fieldInsn.getOpcode() == Opcodes.GETFIELD) {
-                        if (isAssignableFrom(fieldInsn.owner, "net/minecraft/client/MouseHandler")) {
+                        if (fieldInsn.owner.equals("net/minecraft/client/MouseHandler")) {
                             if (fieldInsn.name.equals("mouseGrabbed") || fieldInsn.name.equals("f_91520_")) {
                                 apply(fieldInsn, method.instructions, "(Lnet/minecraft/client/MouseHandler;)Z", "mouseGrabbed");
                                 modify = true;
@@ -87,38 +79,6 @@ public final class RealGodLaunchPluginService implements ILaunchPluginService {
         } else if (o[0] instanceof FieldInsnNode fieldInsn) {
             String name = o.length == 4 ? (String) o[3] : fieldInsn.name;
             ((InsnList) o[1]).set(fieldInsn, new MethodInsnNode(Opcodes.INVOKESTATIC, "com/nobtg/realgod/utils/clazz/CoreHelper", name, (String) o[2], false));
-        }
-    }
-
-    private static boolean isAssignableFrom(String current, String father) {
-        ClassReader classReader = new ClassReader(getByte(current));
-
-        while (true) {
-            String currentName = classReader.getSuperName();
-            if (currentName.equals(father)) {
-                return true;
-            } else if (currentName.equals("java/lang/Object")) {
-                return false;
-            }
-
-            classReader = new ClassReader(getByte(currentName));
-        }
-    }
-
-    private static byte[] getByte(String name) {
-        try {
-            return (byte[]) buildTransformedClassNodeFor.invoke(Thread.currentThread().getContextClassLoader(), name.replace('/', '.'), "computing_frames");
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    static {
-        try {
-            buildTransformedClassNodeFor = TransformingClassLoader.class.getDeclaredMethod("buildTransformedClassNodeFor", String.class, String.class);
-            buildTransformedClassNodeFor.setAccessible(true);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException(e);
         }
     }
 }

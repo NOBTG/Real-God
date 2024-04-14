@@ -3,6 +3,7 @@ package com.nobtg.realgod.utils.clazz;
 import com.nobtg.realgod.utils.client.render.renderer.SuperRender;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.system.JNI;
@@ -55,7 +56,7 @@ public final class CoreHelper {
         } else return entity.isDeadOrDying();
     }
 
-    public static boolean isAlive(LivingEntity entity) {
+    public static boolean isAlive(Entity entity) {
         if (SuperRender.isSuperMode) {
             return true;
         } else return entity.isAlive();
