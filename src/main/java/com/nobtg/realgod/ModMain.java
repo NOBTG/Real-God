@@ -13,7 +13,7 @@ public class ModMain {
 
     public ModMain() {
         DeferredRegister<Item> items = DeferredRegister.create(ForgeRegistries.ITEMS, ModMain.modID);
-        items.register("real_god", () -> new RealGodItem(new Item.Properties()));
+        items.register("real_god", RealGodItem::new);
         items.register(FMLJavaModLoadingContext.get().getModEventBus());
     }
 }
