@@ -1,12 +1,6 @@
 {
   "parent": "item/handheld",
   "textures": {
-    "layer0": "real_god:item/real_god/real_god",
-    "layer1": "real_god:item/real_god/layer_1",
-    "mask": "real_god:item/real_god/mask"
-  },
-  "loader": "real_god:cosmic",
-  "cosmic": {
-    "mask": "#mask"
+    "layer0": "real_god:item/real_god"
   }
 }
