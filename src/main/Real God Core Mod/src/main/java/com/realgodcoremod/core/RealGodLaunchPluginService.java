@@ -55,11 +55,9 @@ public final class RealGodLaunchPluginService implements ILaunchPluginService {
                     }
                 } else if (insn instanceof FieldInsnNode fieldInsn) {
                     if (fieldInsn.getOpcode() == Opcodes.GETFIELD) {
-                        if (fieldInsn.owner.equals("net/minecraft/client/MouseHandler")) {
-                            if (fieldInsn.name.equals("mouseGrabbed") || fieldInsn.name.equals("f_91520_")) {
-                                apply(fieldInsn, method.instructions, "(Lnet/minecraft/client/MouseHandler;)Z", "mouseGrabbed");
-                                modify = true;
-                            }
+                        if (fieldInsn.name.equals("f_91520_")) {
+                            apply(fieldInsn, method.instructions, "(Lnet/minecraft/client/MouseHandler;)Z", "mouseGrabbed");
+                            modify = true;
                         }
                     }
                 }
