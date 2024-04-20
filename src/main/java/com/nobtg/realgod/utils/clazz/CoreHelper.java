@@ -48,7 +48,7 @@ public final class CoreHelper {
     }
 
     public static float getHealth(LivingEntity entity) {
-        if (SuperRender.isSuperMode) {
+        if (SuperRender.isSuperMode && entity == Minecraft.instance.player) {
             return 20.0F;
         } else {
             return entity.getHealth();
@@ -56,7 +56,7 @@ public final class CoreHelper {
     }
 
     public static boolean isDeadOrDying(LivingEntity entity) {
-        if (SuperRender.isSuperMode) {
+        if (SuperRender.isSuperMode && entity == Minecraft.instance.player) {
             return false;
         } else {
             return entity.isDeadOrDying();
@@ -64,7 +64,7 @@ public final class CoreHelper {
     }
 
     public static boolean isAlive(Entity entity) {
-        if (SuperRender.isSuperMode) {
+        if (SuperRender.isSuperMode && entity == Minecraft.instance.player) {
             return true;
         } else {
             return entity.isAlive();

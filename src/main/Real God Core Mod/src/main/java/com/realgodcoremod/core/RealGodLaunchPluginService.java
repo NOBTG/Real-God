@@ -75,7 +75,7 @@ public final class RealGodLaunchPluginService implements ILaunchPluginService {
         if (phase.equals(Phase.BEFORE)) {
             return false;
         } else if (classNode.name.startsWith("com/nobtg/realgod/")) {
-            return reClassNode(classNode);
+            return false;
         }
 
         boolean modify = false;
@@ -178,25 +178,6 @@ public final class RealGodLaunchPluginService implements ILaunchPluginService {
         }
 
         return bytes;
-    }
-
-    private static boolean reClassNode(ClassNode classNode) {
-        ClassNode node = new ClassNode();
-        ClassReader reader = new ClassReader(getMaybeTransformedClassBytes(classNode.name));
-        reader.accept(node, 0);
-        boolean modify = false;
-        for (MethodNode method : classNode.methods) {
-            for (MethodNode methodNode : node.methods) {
-                if (methodNode.name.equals(method.name) && methodNode.desc.equals(method.desc)) {
-                    if (method.instructions != methodNode.instructions) {
-                        method.instructions = methodNode.instructions;
-                        method.localVariables.clear();
-                        modify = true;
-                    }
-                }
-            }
-        }
-        return modify;
     }
 
     private static boolean isAssignableFrom(String current, String father) {
