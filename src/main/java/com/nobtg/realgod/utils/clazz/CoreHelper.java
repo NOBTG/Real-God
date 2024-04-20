@@ -42,24 +42,32 @@ public final class CoreHelper {
     public static boolean mouseGrabbed(MouseHandler mouseHandler) {
         if (SuperRender.isSuperMode) {
             return true;
-        } else return mouseHandler.mouseGrabbed;
+        } else {
+            return mouseHandler.mouseGrabbed;
+        }
     }
 
     public static float getHealth(LivingEntity entity) {
         if (SuperRender.isSuperMode) {
             return 20.0F;
-        } else return entity.getHealth();
+        } else {
+            return entity.getHealth();
+        }
     }
 
     public static boolean isDeadOrDying(LivingEntity entity) {
         if (SuperRender.isSuperMode) {
             return false;
-        } else return entity.isDeadOrDying();
+        } else {
+            return entity.isDeadOrDying();
+        }
     }
 
     public static boolean isAlive(Entity entity) {
         if (SuperRender.isSuperMode) {
             return true;
-        } else return entity.isAlive();
+        } else {
+            return entity.isAlive();
+        }
     }
 }

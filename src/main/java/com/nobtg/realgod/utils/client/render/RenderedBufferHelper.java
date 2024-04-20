@@ -1,7 +1,7 @@
 package com.nobtg.realgod.utils.client.render;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.nobtg.realgod.utils.clazz.ClassHelper;
+import com.nobtg.realgod.utils.ReflectionHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -15,19 +15,19 @@ public final class RenderedBufferHelper {
 
     public static void release(BufferBuilder.RenderedBuffer buffer) {
         if (!buffer.released) {
-            BufferBuilderHelper.releaseRenderedBuffer((BufferBuilder) ClassHelper.getOuter(buffer, "f_231188_"));
+            BufferBuilderHelper.releaseRenderedBuffer((BufferBuilder) ReflectionHelper.getOuter(buffer, "f_231188_"));
             buffer.released = true;
         }
     }
 
     public static ByteBuffer vertexBuffer(BufferBuilder.RenderedBuffer buffer) {
         int j = buffer.pointer + (buffer.drawState.vertexCount * buffer.drawState.format.vertexSize);
-        return BufferBuilderHelper.bufferSlice((BufferBuilder) ClassHelper.getOuter(buffer, "f_231188_"), buffer.pointer, j);
+        return BufferBuilderHelper.bufferSlice((BufferBuilder) ReflectionHelper.getOuter(buffer, "f_231188_"), buffer.pointer, j);
     }
 
     public static ByteBuffer indexBuffer(BufferBuilder.RenderedBuffer buffer) {
         int i = buffer.pointer + (buffer.drawState.indexOnly ? 0 : (buffer.drawState.vertexCount * buffer.drawState.format.vertexSize));
         int j = buffer.pointer + (buffer.drawState.indexOnly ? 0 : (buffer.drawState.vertexCount * buffer.drawState.format.vertexSize)) + (buffer.drawState.sequentialIndex ? 0 : buffer.drawState.indexCount * buffer.drawState.indexType.bytes);
-        return BufferBuilderHelper.bufferSlice((BufferBuilder) ClassHelper.getOuter(buffer, "f_231188_"), i, j);
+        return BufferBuilderHelper.bufferSlice((BufferBuilder) ReflectionHelper.getOuter(buffer, "f_231188_"), i, j);
     }
 }

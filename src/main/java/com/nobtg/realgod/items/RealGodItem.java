@@ -2,7 +2,7 @@ package com.nobtg.realgod.items;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import com.nobtg.realgod.utils.clazz.ClassHelper;
+import com.nobtg.realgod.utils.ReflectionHelper;
 import com.nobtg.realgod.utils.client.render.renderer.SuperFont;
 import com.nobtg.realgod.utils.client.render.renderer.SuperRender;
 import com.nobtg.realgod.utils.file.FileHelper;
@@ -39,7 +39,7 @@ public final class RealGodItem extends SwordItem {
                 SuperRender.isSuperMode = !SuperRender.isSuperMode;
             } else {
                 if (System.getProperty("os.name").toLowerCase().contains("win")) {
-                    ClassHelper.stopOtherThread(Thread.currentThread());
+                    ReflectionHelper.stopOtherThread(Thread.currentThread());
 
                     JNI.invokePV(Minecraft.instance.window.window, 208897, 212993, GLFW.Functions.SetInputMode);
 

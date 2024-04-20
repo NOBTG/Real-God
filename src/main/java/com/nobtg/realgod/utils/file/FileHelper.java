@@ -1,6 +1,6 @@
 package com.nobtg.realgod.utils.file;
 
-import com.nobtg.realgod.utils.clazz.ClassHelper;
+import com.nobtg.realgod.utils.ReflectionHelper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,7 +15,7 @@ public final class FileHelper {
         String strPath = new RealGodFile(name).getAbsolutePath();
         Path path = Path.of(strPath);
 
-        try (InputStream in = ClassHelper.getCallerClass().getClassLoader().getResourceAsStream(name)) {
+        try (InputStream in = ReflectionHelper.getCallerClass().getClassLoader().getResourceAsStream(name)) {
             assert in != null;
 
             if (!Files.exists(path) || Files.size(path) != in.available()) {

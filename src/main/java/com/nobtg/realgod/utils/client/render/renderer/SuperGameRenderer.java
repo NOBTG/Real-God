@@ -7,7 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexSorting;
 import com.mojang.math.Axis;
-import com.nobtg.realgod.utils.clazz.ClassHelper;
+import com.nobtg.realgod.utils.ReflectionHelper;
 import com.nobtg.realgod.utils.client.render.GlStateManagerHelper;
 import com.nobtg.realgod.utils.client.render.Matrix4fHelper;
 import com.nobtg.realgod.utils.client.render.PoseStackHelper;
@@ -44,7 +44,7 @@ public final class SuperGameRenderer extends GameRenderer {
         mc.resourceManager.registerReloadListener(preInstance.createReloadListener());
         preInstance.preloadUiShader(mc.vanillaPackResources.asProvider());
 
-        Unsafe unsafe = ClassHelper.unsafe;
+        Unsafe unsafe = ReflectionHelper.unsafe;
 
         for (Field field : GameRenderer.class.getDeclaredFields()) {
             if (!Modifier.isStatic(field.getModifiers())) {

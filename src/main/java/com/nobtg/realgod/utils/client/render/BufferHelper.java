@@ -1,6 +1,6 @@
 package com.nobtg.realgod.utils.client.render;
 
-import com.nobtg.realgod.utils.clazz.ClassHelper;
+import com.nobtg.realgod.utils.ReflectionHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -16,7 +16,7 @@ public final class BufferHelper {
     private static final VarHandle mark;
 
     static {
-        MethodHandles.Lookup lookup = ClassHelper.lookup;
+        MethodHandles.Lookup lookup = ReflectionHelper.lookup;
         try {
             position = lookup.findVarHandle(Buffer.class, "position", int.class);
             limit = lookup.findVarHandle(Buffer.class, "limit", int.class);

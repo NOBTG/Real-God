@@ -1,7 +1,7 @@
 package com.nobtg.realgod.utils.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.nobtg.realgod.utils.clazz.ClassHelper;
+import com.nobtg.realgod.utils.ReflectionHelper;
 import net.minecraft.client.KeyMapping;
 import net.minecraftforge.client.settings.KeyMappingLookup;
 import net.minecraftforge.client.settings.KeyModifier;
@@ -14,7 +14,7 @@ public final class KeyMappingHelper {
 
     static {
         try {
-            map = ClassHelper.lookup.findStaticVarHandle(KeyMappingLookup.class, "map", EnumMap.class);
+            map = ReflectionHelper.lookup.findStaticVarHandle(KeyMappingLookup.class, "map", EnumMap.class);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }

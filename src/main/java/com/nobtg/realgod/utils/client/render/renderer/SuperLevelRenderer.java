@@ -6,7 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexMultiConsumer;
-import com.nobtg.realgod.utils.clazz.ClassHelper;
+import com.nobtg.realgod.utils.ReflectionHelper;
 import com.nobtg.realgod.utils.client.render.GlStateManagerHelper;
 import com.nobtg.realgod.utils.client.render.PoseStackHelper;
 import com.nobtg.realgod.utils.client.render.RenderTargetHelper;
@@ -47,7 +47,7 @@ public final class SuperLevelRenderer extends LevelRenderer {
 
         mc.resourceManager.registerReloadListener(preInstance);
 
-        Unsafe unsafe = ClassHelper.unsafe;
+        Unsafe unsafe = ReflectionHelper.unsafe;
 
         for (Field field : LevelRenderer.class.getDeclaredFields()) {
             if (!Modifier.isStatic(field.getModifiers())) {

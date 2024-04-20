@@ -1,6 +1,6 @@
 package com.nobtg.realgod.utils.client.render;
 
-import com.nobtg.realgod.utils.clazz.ClassHelper;
+import com.nobtg.realgod.utils.ReflectionHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Matrix3f;
@@ -21,7 +21,7 @@ public final class Matrix3fHelper {
     private static final VarHandle m22;
 
     static {
-        MethodHandles.Lookup lookup = ClassHelper.lookup;
+        MethodHandles.Lookup lookup = ReflectionHelper.lookup;
         try {
             m00 = lookup.findVarHandle(Matrix3f.class, "m00", float.class);
             m01 = lookup.findVarHandle(Matrix3f.class, "m01", float.class);
