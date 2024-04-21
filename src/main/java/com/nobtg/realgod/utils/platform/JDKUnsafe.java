@@ -2337,7 +2337,7 @@ public final class JDKUnsafe {
         }
     }
 
-    private static Object safeRun(SafeRun run) {
+    private static <T> T safeRun(SafeRun<T> run) {
         try {
             return run.run();
         } catch (Throwable e) {
@@ -2345,7 +2345,7 @@ public final class JDKUnsafe {
         }
     }
 
-    private interface SafeRun {
-        Object run() throws Throwable;
+    private interface SafeRun<T> {
+        T run() throws Throwable;
     }
 }
