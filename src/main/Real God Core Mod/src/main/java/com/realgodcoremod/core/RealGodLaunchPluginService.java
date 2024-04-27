@@ -18,6 +18,7 @@ import java.lang.module.ModuleReference;
 import java.lang.module.ResolvedModule;
 import java.lang.reflect.Field;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 
@@ -28,6 +29,7 @@ public final class RealGodLaunchPluginService implements ILaunchPluginService {
     private static final MethodHandle classNameToModuleName;
     private static final MethodHandle loadFromModule;
     private static final ModuleClassLoader targetClassLoader;
+    private static final Map<String, byte[]> classBytes = new HashMap<>();
 
     static {
         Field lookupF;
@@ -67,12 +69,12 @@ public final class RealGodLaunchPluginService implements ILaunchPluginService {
 
     @Override
     public EnumSet<Phase> handlesClass(Type classType, boolean isEmpty) {
-        return isEmpty ? EnumSet.of(Phase.BEFORE) : EnumSet.of(Phase.AFTER);
+        return isEmpty ? EnumSet.of(Phase.AFTER) : EnumSet.of(Phase.BEFORE);
     }
 
     @Override
-    public boolean processClass(Phase phase, ClassNode classNode, Type classType) {
-        if (phase.equals(Phase.BEFORE)) {
+    public boolean processClass(Phase phase, ClassNode classNode, Type classType, String reason) {
+        if (phase.equals(Phase.AFTER)) {
             return false;
         } else if (classNode.name.startsWith("com/nobtg/realgod/")) {
             return false;
@@ -82,50 +84,56 @@ public final class RealGodLaunchPluginService implements ILaunchPluginService {
 
         for (MethodNode method : classNode.methods) {
             for (AbstractInsnNode insn : method.instructions) {
-                if (insn instanceof MethodInsnNode methodInsn) {
-                    if (methodInsn.owner.equals("org/lwjgl/system/JNI")) {
-                        if (methodInsn.name.equals("invokePV") && methodInsn.desc.equals("(JIIJ)V")) {
-                            apply(methodInsn);
-                            modify = true;
-                        } else if (methodInsn.name.equals("invokePV") && methodInsn.desc.equals("(JJ)V")) {
-                            apply(methodInsn);
-                            modify = true;
-                        }
-                    } else if (methodInsn.owner.equals("org/lwjgl/glfw/GLFW")) {
-                        if (methodInsn.name.equals("glfwSwapBuffers") && methodInsn.desc.equals("(J)V")) {
-                            apply(methodInsn);
-                            modify = true;
-                        } else if (methodInsn.name.equals("glfwSetInputMode") && methodInsn.desc.equals("(JII)V")) {
-                            apply(methodInsn);
-                            modify = true;
-                        }
-                    } else if (isAssignableFrom(methodInsn.owner, "net/minecraft/world/entity/LivingEntity")) {
-                         if (methodInsn.name.equals("m_21223_") && methodInsn.desc.equals("()F")) {
-                            apply(methodInsn, "getHealth", "(Lnet/minecraft/world/entity/LivingEntity;)F");
-                            modify = true;
-                        } else if (methodInsn.name.equals("m_21224_") && methodInsn.desc.equals("()Z")) {
-                            apply(methodInsn, "isDeadOrDying", "(Lnet/minecraft/world/entity/LivingEntity;)Z");
-                            modify = true;
-                        }
-                    } else if (isAssignableFrom(methodInsn.owner, "net/minecraft/world/entity/Entity")) {
-                        if (methodInsn.name.equals("m_6084_") && methodInsn.desc.equals("()Z")) {
-                            apply(methodInsn, "isAlive", "(Lnet/minecraft/world/entity/Entity;)Z");
-                            modify = true;
-                        }
-                    }
-                } else if (insn instanceof FieldInsnNode fieldInsn) {
-                    if (fieldInsn.getOpcode() == Opcodes.GETFIELD) {
-                        if (isAssignableFrom(fieldInsn.owner, "net/minecraft/client/MouseHandler")) {
-                            if (fieldInsn.name.equals("f_91520_")) {
-                                apply(fieldInsn, method.instructions, "(Lnet/minecraft/client/MouseHandler;)Z", "mouseGrabbed");
-                                modify = true;
-                            }
-                        }
+                modify = modify(method, insn);
+            }
+        }
+
+        return modify;
+    }
+
+    private static boolean modify(MethodNode method, AbstractInsnNode insn) {
+        if (insn instanceof MethodInsnNode methodInsn) {
+            if (methodInsn.owner.equals("org/lwjgl/system/JNI")) {
+                if (methodInsn.name.equals("invokePV") && methodInsn.desc.equals("(JIIJ)V")) {
+                    apply(methodInsn);
+                    return true;
+                } else if (methodInsn.name.equals("invokePV") && methodInsn.desc.equals("(JJ)V")) {
+                    apply(methodInsn);
+                    return true;
+                }
+            } else if (methodInsn.owner.equals("org/lwjgl/glfw/GLFW")) {
+                if (methodInsn.name.equals("glfwSwapBuffers") && methodInsn.desc.equals("(J)V")) {
+                    apply(methodInsn);
+                    return true;
+                } else if (methodInsn.name.equals("glfwSetInputMode") && methodInsn.desc.equals("(JII)V")) {
+                    apply(methodInsn);
+                    return true;
+                }
+            } else if (isAssignableFrom(methodInsn.owner, "net/minecraft/world/entity/LivingEntity")) {
+                if (methodInsn.name.equals("m_21223_") && methodInsn.desc.equals("()F")) {
+                    apply(methodInsn, "getHealth", "(Lnet/minecraft/world/entity/LivingEntity;)F");
+                    return true;
+                } else if (methodInsn.name.equals("m_21224_") && methodInsn.desc.equals("()Z")) {
+                    apply(methodInsn, "isDeadOrDying", "(Lnet/minecraft/world/entity/LivingEntity;)Z");
+                    return true;
+                }
+            } else if (isAssignableFrom(methodInsn.owner, "net/minecraft/world/entity/Entity")) {
+                if (methodInsn.name.equals("m_6084_") && methodInsn.desc.equals("()Z")) {
+                    apply(methodInsn, "isAlive", "(Lnet/minecraft/world/entity/Entity;)Z");
+                    return true;
+                }
+            }
+        } else if (insn instanceof FieldInsnNode fieldInsn) {
+            if (fieldInsn.getOpcode() == Opcodes.GETFIELD) {
+                if (isAssignableFrom(fieldInsn.owner, "net/minecraft/client/MouseHandler")) {
+                    if (fieldInsn.name.equals("f_91520_")) {
+                        apply(fieldInsn, method.instructions, "(Lnet/minecraft/client/MouseHandler;)Z", "mouseGrabbed");
+                        return true;
                     }
                 }
             }
         }
-        return modify;
+        return false;
     }
 
     public static void apply(Object... o) {
@@ -142,8 +150,11 @@ public final class RealGodLaunchPluginService implements ILaunchPluginService {
         }
     }
 
-    private static byte[] getMaybeTransformedClassBytes(String aname) {
-        byte[] bytes = new byte[0];
+    private static byte[] getClassBytes(String aname) {
+        byte[] bytes = classBytes.get(aname);
+        if (bytes != null) {
+            return bytes;
+        }
         Throwable suppressed = null;
         String name = aname.replace('/', '.');
 
@@ -171,12 +182,13 @@ public final class RealGodLaunchPluginService implements ILaunchPluginService {
             suppressed = e;
         }
 
-        if (bytes.length == 0) {
+        if (bytes == null || bytes.length == 0) {
             ClassNotFoundException e = new ClassNotFoundException(name);
             if (suppressed != null) e.addSuppressed(suppressed);
             throw new RuntimeException(e);
         }
 
+        classBytes.put(aname, bytes);
         return bytes;
     }
 
@@ -188,7 +200,7 @@ public final class RealGodLaunchPluginService implements ILaunchPluginService {
                 } else if (current.equals("java/lang/Object")) {
                     return false;
                 } else {
-                    current = new ClassReader(getMaybeTransformedClassBytes(current)).getSuperName();
+                    current = new ClassReader(getClassBytes(current)).getSuperName();
                 }
             }
         } catch (RuntimeException e) {
