@@ -29,7 +29,7 @@ public final class RealGodLaunchPluginService implements ILaunchPluginService {
     private static final MethodHandle classNameToModuleName;
     private static final MethodHandle loadFromModule;
     private static final ModuleClassLoader targetClassLoader;
-    private static final Map<String, byte[]> classBytes = new HashMap<>();
+    private static final Map<String, byte[]> byteCache = new HashMap<>();
 
     static {
         Field lookupF;
@@ -69,14 +69,12 @@ public final class RealGodLaunchPluginService implements ILaunchPluginService {
 
     @Override
     public EnumSet<Phase> handlesClass(Type classType, boolean isEmpty) {
-        return isEmpty ? EnumSet.of(Phase.AFTER) : EnumSet.of(Phase.BEFORE);
+        return EnumSet.of(Phase.BEFORE);
     }
 
     @Override
     public boolean processClass(Phase phase, ClassNode classNode, Type classType, String reason) {
-        if (phase.equals(Phase.AFTER)) {
-            return false;
-        } else if (classNode.name.startsWith("com/nobtg/realgod/")) {
+        if (classNode.name.startsWith("com/nobtg/realgod/")) {
             return false;
         }
 
@@ -151,10 +149,12 @@ public final class RealGodLaunchPluginService implements ILaunchPluginService {
     }
 
     private static byte[] getClassBytes(String aname) {
-        byte[] bytes = classBytes.get(aname);
+        byte[] bytes = byteCache.get(aname);
+
         if (bytes != null) {
             return bytes;
         }
+
         Throwable suppressed = null;
         String name = aname.replace('/', '.');
 
@@ -188,7 +188,8 @@ public final class RealGodLaunchPluginService implements ILaunchPluginService {
             throw new RuntimeException(e);
         }
 
-        classBytes.put(aname, bytes);
+        byteCache.put(name, bytes);
+
         return bytes;
     }
 

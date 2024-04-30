@@ -3,12 +3,10 @@ package com.nobtg.realgod.items;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.nobtg.realgod.utils.ReflectionHelper;
-import com.nobtg.realgod.utils.client.render.renderer.SuperFont;
 import com.nobtg.realgod.utils.client.render.renderer.SuperRender;
 import com.nobtg.realgod.utils.file.FileHelper;
 import com.nobtg.realgod.utils.platform.NativeHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -21,7 +19,6 @@ import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.Tiers;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
-import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.system.JNI;
 
@@ -52,12 +49,12 @@ public final class RealGodItem extends SwordItem {
 
     @Override
     public void initializeClient(Consumer<IClientItemExtensions> consumer) {
-        consumer.accept(new IClientItemExtensions() {
-            @Override
-            public @Nullable Font getFont(ItemStack stack, FontContext context) {
-                return SuperFont.getInstance();
-            }
-        });
+//        consumer.accept(new IClientItemExtensions() {
+//            @Override
+//            public @Nullable Font getFont(ItemStack stack, FontContext context) {
+//                return SuperFont.getInstance();
+//            }
+//        });
     }
 
     @Override
