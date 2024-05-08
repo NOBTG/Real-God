@@ -25,8 +25,9 @@ jobs:
       run: chmod +x './src/main/Real God Core Mod/gradlew'
 
     - name: Build with Gradle Wrapper
-      run: cd "./src/main/Real God Core Mod/gradlew"
-           ./gradlew build
+      run: |
+        cd "./src/main/Real God Core Mod/gradlew"
+        ./gradlew build
 
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4.3.1
