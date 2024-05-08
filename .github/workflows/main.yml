@@ -22,16 +22,17 @@ jobs:
       uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
 
     - name: Change wrapper permissions
-      run: chmod +x ./src/main/Real God Core Mod/gradlew
+      run: chmod +x './src/main/Real God Core Mod/gradlew'
 
     - name: Build with Gradle Wrapper
-      run: ./src/main/Real God Core Mod/gradlew build
+      run: cd "./src/main/Real God Core Mod/gradlew"
+           ./gradlew build
 
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4.3.1
       with:
         name: real_god_core
-        path: src/main/Real God Core Mod/build/libs/real_god_core.jar
+        path: 'src/main/Real God Core Mod/build/libs/real_god_core.jar'
         compression-level: 0
         overwrite: true
 
