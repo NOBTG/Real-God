@@ -33,7 +33,7 @@ jobs:
       uses: actions/upload-artifact@v4.3.1
       with:
         name: real_god_core
-        path: "./src/main/Real God Core Mod/build/libs/real_god_core.jar"
+        path: build/libs/real_god_core.jar
         compression-level: 0
         overwrite: true
 
